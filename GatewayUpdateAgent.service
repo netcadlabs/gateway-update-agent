@@ -1,0 +1,8 @@
+[Unit]
+Description=Gateway Update Agent by CcC KoRHuN CcC
+
+[Service]
+ExecStart=/usr/share/GatewayUpdateAgent/GatewayUpdateAgent
+
+[Install]
+WantedBy=multi-user.target
