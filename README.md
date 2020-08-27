@@ -133,8 +133,10 @@ GW Update Agent, Update API'den kendisinde kurulu olması gereken bundle bilgisi
  type: <type>
  configuration: <type>.json
  class: <class> //info.json'dan okunan değer.
- pack_version: <>
- conf_version: <>  
+ version_<conf-id>: <<agent version>#<pack-id>> 
+ version_<pack1-id>: <>
+ version_<pack-2-id>: <>
+ version_<pack-N-id>: <>
 ```
   
 * UpdatePackage config download url üzerin den config dosyası indirilir.
