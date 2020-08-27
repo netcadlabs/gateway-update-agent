@@ -86,21 +86,25 @@ GW Update Agent, Update API'den kendisinde kurulu olması gereken bundle bilgisi
 ```json
 [
     {
-        "config_url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/config.json",
-        "config_version": 3,
-        "pack_url": "https://github.com/korhun/nduagent/blob/master/test/update_test_v2.zip?raw=true",
-        "pack_version": 2,
-        "type": "camera"
+        "type" : "sigara", //connector name
+        "id" : "uuid", unique name
+        "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/config.json",
+        "category": "CONFIG", //CONFIG, PACKAGE
+        "version": 23,
     },
     {
-        "config_url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/config.json",
-        "config_version": 2,
-        "type": "face recognition"
+        "type" : "sigara", //connector name
+        "id" : "uuid", unique name
+        "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/sigara.zip",
+        "category": "PACKAGE", //CONFIG, PACKAGE
+        "version": 5,
     },
     {
-        "pack_url": "https://github.com/korhun/nduagent/blob/master/test/update_test_v2.zip?raw=true",
-        "pack_version": 6,
-        "type": "object detection"
+        "type" : "sigara", //connector name
+        "id" : "uuid", unique name
+        "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/sigara-model-data.zip",
+        "category": "PACKAGE", //CONFIG, PACKAGE
+        "version": 2,
     }
 ]
 ```
