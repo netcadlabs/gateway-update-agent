@@ -9,6 +9,7 @@ namespace Netcad.NDU.GatewayUpdateAgent.Settings {
 
         private config _config;
         public string Hostname { get { return _config.Hostname; } }
+        public string Token { get { return _config.Token; } }
         public double IntervalInMinutes { get { return _config.IntervalInMinutes; } }
         public string ExtensionFolder { get { return _config.ExtensionFolder; } }
         public string ConfigFolder { get { return _config.ConfigFolder; } }
@@ -20,17 +21,32 @@ namespace Netcad.NDU.GatewayUpdateAgent.Settings {
 
         public Settings(ILogger<Settings> logger) {
             this._logger = logger;
-            this.Reload();
+            this.load();
         }
-        public void Reload() {
+
+#if DEBUG
+        private string fileName;
+#else
+        private const string fileName = @"/etc/GatewayUpdateAgent/GatewayUpdateAgent.conf";
+#endif
+        private DateTime _lastWriteTimeUtc = DateTime.MinValue;
+        public void ReloadIfRequired() {
+            System.IO.FileInfo fi = new FileInfo(fileName);
+            if (fi.LastWriteTimeUtc != this._lastWriteTimeUtc)
+                this.load();
+        }
+        private void load() {
             try {
                 this.UpdateAgentVersion = (Version)typeof(Settings).Assembly.GetName().Version;
-                string fileName = @"/etc/GatewayUpdateAgent/GatewayUpdateAgent.conf";
 #if DEBUG
                 string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 fileName = Path.Combine(assemblyFolder, "GatewayUpdateAgent.conf");
 #endif
                 this._config = System.Text.Json.JsonSerializer.Deserialize<config>(File.ReadAllText(fileName));
+                if (string.IsNullOrWhiteSpace(this._config.Hostname))
+                    throw new Exception($"No Hostname definden in {fileName}");
+                if (!this._config.Hostname.EndsWith("/"))
+                    this._config.Hostname += "/";
                 this.TempFolder = @"/tmp/Netcad/NDU/GUA/temp";
 
 #if DEBUG
@@ -50,6 +66,7 @@ namespace Netcad.NDU.GatewayUpdateAgent.Settings {
 
         private class config {
             public string Hostname { get; set; }
+            public string Token { get; set; }
             public double IntervalInMinutes { get; set; }
             public string ExtensionFolder { get; set; }
             public string ConfigFolder { get; set; }

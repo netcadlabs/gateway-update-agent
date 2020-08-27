@@ -40,15 +40,19 @@ namespace Netcad.NDU.GatewayUpdateAgent.Updater {
             // string url = "https://raw.githubusercontent.com/korhun/nduagent/master/test/getUpdates_Pack1.json";
             // string url = "https://raw.githubusercontent.com/korhun/nduagent/master/test/getUpdates_uninstall.json";
 
-            settings.Reload(); //****
-            string url = settings.Hostname;
+            settings.ReloadIfRequired(); //****
+            string url = string.Concat(settings.Hostname, settings.Token);
 
             var webClient = new WebClient();
             string bundlesArrayJson = webClient.DownloadString(url);
 
-            var obj = System.Text.Json.JsonSerializer.Deserialize<Bundle[]>(bundlesArrayJson);
-
-            this.installManager.CheckUpdates(obj);
+            Bundle[] bundles = null;
+            try {
+                bundles = System.Text.Json.JsonSerializer.Deserialize<Bundle[]>(bundlesArrayJson);
+            } catch (Exception ex) {
+                throw new Exception($"Error while parsing bundles! API response:{bundlesArrayJson}", ex);
+            }
+            this.installManager.CheckUpdates(bundles);
         }
 
         // private class jsonObj {
