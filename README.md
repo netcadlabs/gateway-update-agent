@@ -87,21 +87,21 @@ GW Update Agent, Update API'den kendisinde kurulu olması gereken bundle bilgisi
 [
     {
         "type" : "sigara",
-        "id" : "uuid", unique name
+        "id" : "uuid", 
         "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/config.json",
         "category": "CONFIG",
         "version": 23,
     },
     {
         "type" : "sigara",
-        "id" : "uuid", unique name
+        "id" : "uuid",
         "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/sigara.zip",
         "category": "PACKAGE",
         "version": 5,
     },
     {
         "type" : "sigara",
-        "id" : "uuid", unique name
+        "id" : "uuid",
         "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/sigara-model-data.zip",
         "category": "PACKAGE",
         "version": 2,
