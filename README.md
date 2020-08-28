@@ -86,28 +86,31 @@ GW Update Agent, Update API'den kendisinde kurulu olması gereken bundle bilgisi
 ```json
 [
     {
-        "type" : "sigara", //connector name
+        "type" : "sigara",
         "id" : "uuid", unique name
         "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/config.json",
-        "category": "CONFIG", //CONFIG, PACKAGE
+        "category": "CONFIG",
         "version": 23,
     },
     {
-        "type" : "sigara", //connector name
+        "type" : "sigara",
         "id" : "uuid", unique name
         "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/sigara.zip",
-        "category": "PACKAGE", //CONFIG, PACKAGE
+        "category": "PACKAGE",
         "version": 5,
     },
     {
-        "type" : "sigara", //connector name
+        "type" : "sigara",
         "id" : "uuid", unique name
         "url": "https://raw.githubusercontent.com/korhun/nduagent/master/test/sigara-model-data.zip",
-        "category": "PACKAGE", //CONFIG, PACKAGE
+        "category": "PACKAGE",
         "version": 2,
     }
 ]
 ```
+***type:*** onnector name
+***id:*** unique name
+***category:*** //CONFIG, PACKAGE
 
 * GW Update Agent,
   * Daha önceden kurulmuş ancak bu listede bulunmayan pack ve config'leri siler.
