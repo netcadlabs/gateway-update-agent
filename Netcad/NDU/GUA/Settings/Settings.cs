@@ -1,11 +1,12 @@
 using System;
 using System.IO;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Netcad.NDU.GatewayUpdateAgent.Utils;
+using Newtonsoft.Json;
 
-namespace Netcad.NDU.GatewayUpdateAgent.Settings {
-    public class Settings : ISettings {
+namespace Netcad.NDU.GUA.Settings
+{
+    public class Settings : ISettings
+    {
 
         private config _config;
         public string Hostname { get { return _config.Hostname; } }
@@ -14,12 +15,15 @@ namespace Netcad.NDU.GatewayUpdateAgent.Settings {
         public string ExtensionFolder { get { return _config.ExtensionFolder; } }
         public string ConfigFolder { get { return _config.ConfigFolder; } }
         public string YamlFileName { get { return _config.YamlFileName; } }
-        public Version UpdateAgentVersion { get; private set; }
+
+        public string HistoryFolder { get; private set; }
+        public Version GUAVersion { get; private set; }
         public string TempFolder { get; private set; }
 
         public readonly ILogger<Settings> _logger;
 
-        public Settings(ILogger<Settings> logger) {
+        public Settings(ILogger<Settings> logger)
+        {
             this._logger = logger;
             this.load();
         }
@@ -30,22 +34,25 @@ namespace Netcad.NDU.GatewayUpdateAgent.Settings {
         private const string fileName = @"/etc/GatewayUpdateAgent/GatewayUpdateAgent.conf";
 #endif
         private DateTime _lastWriteTimeUtc = DateTime.MinValue;
-        public void ReloadIfRequired() {
+        public void ReloadIfRequired()
+        {
             System.IO.FileInfo fi = new FileInfo(fileName);
             if (fi.LastWriteTimeUtc != this._lastWriteTimeUtc)
                 this.load();
         }
-        private void load() {
-            try {
-                this.UpdateAgentVersion = (Version)typeof(Settings).Assembly.GetName().Version;
+        private void load()
+        {
+            try
+            {
+                this.GUAVersion = (Version)typeof(Settings).Assembly.GetName().Version;
 #if DEBUG
                 string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 fileName = Path.Combine(assemblyFolder, "GatewayUpdateAgent.conf");
 #endif
-                this._config = System.Text.Json.JsonSerializer.Deserialize<config>(File.ReadAllText(fileName));
+                this._config = JsonConvert.DeserializeObject<config>(File.ReadAllText(fileName));
                 if (string.IsNullOrWhiteSpace(this._config.Hostname))
                     throw new Exception($"No Hostname definden in {fileName}");
-                if (!this._config.Hostname.EndsWith("/"))
+                if (!string.IsNullOrWhiteSpace(this._config.Token) && !this._config.Hostname.EndsWith("/"))
                     this._config.Hostname += "/";
                 this.TempFolder = @"/tmp/Netcad/NDU/GUA/temp";
 
@@ -56,15 +63,22 @@ namespace Netcad.NDU.GatewayUpdateAgent.Settings {
                 this._config.YamlFileName = Path.Combine(testDir, @"tb_gateway.yaml");
                 this._config.ConfigFolder = Path.Combine(testDir, @"configs");
                 this._config.ExtensionFolder = Path.Combine(testDir, @"extensions");
-
 #endif
-            } catch (Exception ex) {
+                if(!Directory.Exists(this.ExtensionFolder))
+                    Directory.CreateDirectory(this.ExtensionFolder);
+                this.HistoryFolder = Path.Combine(this.ExtensionFolder, "_GUA_History");
+                if(!Directory.Exists(this.HistoryFolder))
+                    Directory.CreateDirectory(this.HistoryFolder);
+            }
+            catch (Exception ex)
+            {
                 _logger.LogError(ex, "Settings initialize error.");
                 throw ex;
             }
         }
 
-        private class config {
+        private class config
+        {
             public string Hostname { get; set; }
             public string Token { get; set; }
             public double IntervalInMinutes { get; set; }

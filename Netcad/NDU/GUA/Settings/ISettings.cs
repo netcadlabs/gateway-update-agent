@@ -1,7 +1,9 @@
 using System;
 
-namespace Netcad.NDU.GatewayUpdateAgent.Settings {
-    public interface ISettings {
+namespace Netcad.NDU.GUA.Settings
+{
+    public interface ISettings
+    {
         string Hostname { get; }
         string Token { get; }
         double IntervalInMinutes { get; }
@@ -9,7 +11,8 @@ namespace Netcad.NDU.GatewayUpdateAgent.Settings {
         string ConfigFolder { get; }
         string YamlFileName { get; }
 
-        Version UpdateAgentVersion { get; }
+        string HistoryFolder { get; }
+        Version GUAVersion { get; }
         string TempFolder { get; }
 
         void ReloadIfRequired();

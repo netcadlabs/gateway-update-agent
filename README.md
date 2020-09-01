@@ -126,7 +126,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
     * **pre_install.sh** isimli bir dosya varsa, Thingsboard servisi **durdurulmadan önce** çalıştırılır.
     * **install.sh** isimli bir dosya varsa, Thingsboard servisi **durdurulduktan sonra** çalıştırılır.
     * **post_install.sh** isimli bir dosya varsa, Thingsboard servisi **çalıştırıldıktan sonra** çalıştırılır.
-    * **uninstall.sh** isimli bir dosya varsa, bu uninstall işi gerekiyorsa kullanılır.
+    * **uninstall.sh** isimli bir dosya varsa, bu elemanın uninstall işlemi için çalıştırılır.
 
 
 ## Çalışma Detayları
@@ -135,14 +135,14 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
   * API'nin döndüğü listede bulunan ancak gateway'e henüz kurulmamış olan elemanları indirir; indirmesi başarılı olanları kurar.
   * API'nın döndüğü listede bulunan, gateway'e kurulmuş ve versiyonu daha düşük olan elemanları önce kaldırır, sonra kurar.
   * API'nin döndüğü listede bulunmayan ancak gateway'e kurulmuş olan elemanlar için:
-    * **CONFIG** elemanlar için oluşturulan json dosyalarını aktif olmayan elemanlar için kullanılan bir dizine taşır.
-    * **PACKAGE** içeriği ile gelen tim dosyalar aktif olmayan elemanlar için kullanılan bir dizine taşınır.
-    * **COMMAND** içeriğinde **uninstall.sh** dosyası varsa çalıştırılır.
+    * **CONFIG** elemanlar için oluşturulan json dosyalarını aktif olmayan elemanlar için kullanılan bir dizine taşır. Yani config deaktive edilir.
+    * **PACKAGE** içeriği ile gelen tim dosyalar aktif olmayan elemanlar için kullanılan bir dizine taşınır. Yani package deaktive edilir.
+    * **COMMAND** içeriğinde **uninstall.sh** dosyası varsa çalıştırılır. Command'e ait tutulan birşey varsa silinir. Yani command elemanları deaktive edilmez, kaldırılır.
   * İnaktif hale gelmiş bir eleman API'nin döndüğü listede yeniden kurulmak istenirse.
     * Versiyon aynı değilse inaktif olarak tutulan dosyalar silinir, eleman yeniden indirilir.
     * Versiyon aynıysa, eleman indirilmez, inaktif olarak tutulan dosyalar kullanılarak yeniden kurulum yapılır.
 
-* Install veya uninstall yapılacaksa, thingsboard servisi işlem öncesi durdurulur ve işlem sonrası tekrar çalışılır. Ardından Update API'ye güncel durum bildirilir. Hata oluşmuşsa bildirilir.
+* Install veya uninstall yapılacaksa, Thingsboard servisi işlem öncesi durdurulur ve işlem sonrası tekrar çalışılır. Ardından Update API'ye güncel durum bildirilir. Hata oluşmuşsa bildirilir.
     
 ### Notlar
 

@@ -1,17 +1,13 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Netcad.NDU.GatewayUpdateAgent.Download;
-using Netcad.NDU.GatewayUpdateAgent.Install;
-using Netcad.NDU.GatewayUpdateAgent.Settings;
-using Netcad.NDU.GatewayUpdateAgent.Updater;
+using Netcad.NDU.GUA.Install;
+using Netcad.NDU.GUA.Settings;
+using Netcad.NDU.GUA.Updater;
 using NLog.Extensions.Logging;
 
-namespace Netcad.NDU.GatewayUpdateAgent {
+namespace Netcad.NDU.GUA {
     class Program {
         public static async Task Main(string[] args) {
             var builder = new HostBuilder()
