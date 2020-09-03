@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using Netcad.NDU.GUA.Utils;
 
 namespace Netcad.NDU.GUA.Settings
 {
@@ -18,7 +18,7 @@ namespace Netcad.NDU.GUA.Settings
 
         public string HistoryFolder { get; private set; }
         public Version GUAVersion { get; private set; }
-        public string TempFolder { get; private set; }
+        //****public string TempFolder { get; private set; }
 
         public readonly ILogger<Settings> _logger;
 
@@ -49,12 +49,12 @@ namespace Netcad.NDU.GUA.Settings
                 string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 fileName = Path.Combine(assemblyFolder, "GatewayUpdateAgent.conf");
 #endif
-                this._config = JsonConvert.DeserializeObject<config>(File.ReadAllText(fileName));
+                this._config = Helper.DeserializeFromJsonFile<config>(fileName);
                 if (string.IsNullOrWhiteSpace(this._config.Hostname))
                     throw new Exception($"No Hostname definden in {fileName}");
                 if (!string.IsNullOrWhiteSpace(this._config.Token) && !this._config.Hostname.EndsWith("/"))
                     this._config.Hostname += "/";
-                this.TempFolder = @"/tmp/Netcad/NDU/GUA/temp";
+                //*****this.TempFolder = @"/tmp/Netcad/NDU/GUA/temp";
 
 #if DEBUG
                 string testDir = @"/tmp/Netcad/NDU/GUA_test";

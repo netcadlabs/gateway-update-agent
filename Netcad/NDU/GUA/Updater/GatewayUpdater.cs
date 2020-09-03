@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System;
 using System.Net;
 using Microsoft.Extensions.Logging;
@@ -5,6 +6,7 @@ using Netcad.NDU.GUA.Elements;
 using Netcad.NDU.GUA.Install;
 using Netcad.NDU.GUA.Settings;
 using Newtonsoft.Json;
+using Netcad.NDU.GUA.Utils;
 
 namespace Netcad.NDU.GUA.Updater {
     public class GatewayUpdater : IUpdater {
@@ -36,7 +38,7 @@ namespace Netcad.NDU.GUA.Updater {
 
             UpdateInfo[] updates = null;
             try {
-                updates = JsonConvert.DeserializeObject<UpdateInfo[]>(bundlesArrayJson);
+                updates = Helper.DeserializeFromJsonText<UpdateInfo[]>(bundlesArrayJson);
             } catch (Exception ex) {
                 throw new Exception($"Error while parsing bundles! API response:{bundlesArrayJson}", ex);
             }

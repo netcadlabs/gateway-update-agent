@@ -67,7 +67,7 @@ namespace Netcad.NDU.GUA.Install
         }
 
         private static object ioLocker = new object();
-        internal void UpdateConnectors(InstalledType[] arr)
+        internal void UpdateConnectors(Bundle[] arr)
         {
             lock(ioLocker)
             {
@@ -88,9 +88,9 @@ namespace Netcad.NDU.GUA.Install
                     if (connector.ContainsKey(Key_GUAVersion))
                         connectors.RemoveAt(i);
                 }
-                foreach (InstalledType it in arr)
+                foreach (Bundle b in arr)
                 {
-                    connectors.Add(toConnector(it));
+                    connectors.Add(toConnector(b));
                 }
 
                 var serializer = new SerializerBuilder().Build();
@@ -98,7 +98,7 @@ namespace Netcad.NDU.GUA.Install
             }
         }
 
-        private object toConnector(InstalledType it)
+        private object toConnector(Bundle b)
         {
             // name: < type > Connector
             // type: < type >
@@ -107,12 +107,12 @@ namespace Netcad.NDU.GUA.Install
             //     pack_version: < >
             //     conf_version: < >
             Dictionary<object, object> dic = new Dictionary<object, object>();
-            dic.Add(Key_Name, $"{it.Type} Connector");
-            dic.Add(Key_Type, $"{it.Type}");
-            dic.Add(Key_Config, $"{it.Type}.json");
-            if (!string.IsNullOrWhiteSpace(it.ClassName))
-                dic.Add(Key_ClassName, it.ClassName);
-            dic.Add(Key_GUAVersion, it.GUAVersion);
+            dic.Add(Key_Name, $"{b.Type} Connector");
+            dic.Add(Key_Type, $"{b.Type}");
+            dic.Add(Key_Config, $"{b.Type}.json");
+            if (!string.IsNullOrWhiteSpace(b.ClassName))
+                dic.Add(Key_ClassName, b.ClassName);
+            dic.Add(Key_GUAVersion, b.GUAVersion);
             return dic;
         }
 

@@ -8,7 +8,7 @@ using Netcad.NDU.GUA.Settings;
 using Netcad.NDU.GUA.Utils;
 using Newtonsoft.Json;
 
-namespace Netcad.NDU.GUA.Download
+namespace Netcad.NDU.GUA.Download_
 {
     public class DownloadedPack
     {
@@ -42,7 +42,6 @@ namespace Netcad.NDU.GUA.Download
             this.zipFileName = zipFileName;
             this.settings = settings;
             this.extractDir = extractDir;
-
         }
         private void parse()
         {
@@ -65,7 +64,7 @@ namespace Netcad.NDU.GUA.Download
                     parse();
                 if (this.info.copy != null)
                 {
-                    logger.LogInformation($"Installing pack: Type:{this.UpdateInfo.Type} Id:{this.UpdateInfo.Id}");
+                    logger.LogInformation($"Installing pack: Type:{this.UpdateInfo.Type} Id:{this.UpdateInfo.ID}");
                     foreach (CopyInfo ci in this.info.copy)
                     {
 #if DEBUG
@@ -98,7 +97,7 @@ namespace Netcad.NDU.GUA.Download
             {
                 lock (errors)
                 {
-                    errors.Add(this.UpdateInfo.Id, ex);
+                    errors.Add(this.UpdateInfo.ID, ex);
                 }
                 return false;
             }

@@ -1,9 +1,19 @@
 using System.IO;
+using System.Net.Mime;
+using Newtonsoft.Json;
 
 namespace Netcad.NDU.GUA.Utils
 {
     internal static class Helper
     {
+        public static string ReplaceInvalidFileNameChars(string filename, string replace)
+        {
+            return string.Join(replace, filename.Split(Path.GetInvalidFileNameChars()));
+        }
+        public static string ReplaceInvalidPathChars(string path, string replace)
+        {
+            return string.Join(replace, path.Split(Path.GetInvalidPathChars()));
+        }
 
         public static void CopyDirectory(string source, string destination, bool cleanDestination)
         {
@@ -69,6 +79,21 @@ namespace Netcad.NDU.GUA.Utils
             if (!double.TryParse(val as string, out d))
                 d = defaultValue;
             return d;
+        }
+
+        public static void SerializeToJsonFile<T>(T obj, string fileName)
+        {
+            var settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            File.WriteAllText(fileName, JsonConvert.SerializeObject(obj, Formatting.Indented, settings));
+        }
+        public static T DeserializeFromJsonFile<T>(string fileName)
+        {
+            return JsonConvert.DeserializeObject<T>(File.ReadAllText(fileName));
+        }
+        public static T DeserializeFromJsonText<T>(string jsonText)
+        {
+            return JsonConvert.DeserializeObject<T>(jsonText);
         }
     }
 }
