@@ -13,40 +13,17 @@ namespace Netcad.NDU.GUA.Elements.Items
     internal class Package : IItem
     {
         #region Model
-        public string ID
-        {
-            get => this._lite.ID;
-            set => this._lite.ID = value;
-        }
+        public string ID { get; set; }
         public Category Category => Category.Package;
-        public int Version
-        {
-            get => this._lite.Version;
-            set => this._lite.Version = value;
-        }
-        public string URL
-        {
-            get => this._lite.URL;
-            set => this._lite.URL = value;
-        }
-        public States State
-        {
-            get => this._lite.State;
-            set => this._lite.State = value;
-        }
+        public int Version { get; set; }
+        public string URL { get; set; }
+        public States State { get; set; }
+        public Dictionary<string, object> YamlCustomProperties { get; set; }
+        public List<string> CustomCopiedFiles = new List<string>();
 
         public void Save(string fileName)
         {
-            Helper.SerializeToJsonFile(this._lite, fileName);
-        }
-
-        private packageLite _lite;
-        private class packageLite
-        {
-            public string ID { get; set; }
-            public int Version { get; set; }
-            public string URL { get; set; }
-            public States State { get; set; }
+            Helper.SerializeToJsonFile(this, fileName);
         }
 
         #endregion
@@ -130,13 +107,14 @@ namespace Netcad.NDU.GUA.Elements.Items
             if (!Directory.Exists(extractDir))
                 Directory.CreateDirectory(extractDir);
             else
-                Helper.CleanDirectory(extractDir);
+                Helper.CleanDir(extractDir);
 
             ZipFile.ExtractToDirectory(zipFn, extractDir);
             return PackInfoJson.Parse(extractDir);
         }
         private void install(ISettings stt)
         {
+            this.deactivate(stt);
             string zipFn = this.getZipFileName(stt);
             if (!File.Exists(zipFn))
                 throw new Exception($"Downloaded file does not exist: {zipFn}");
@@ -144,23 +122,29 @@ namespace Netcad.NDU.GUA.Elements.Items
             {
                 string extractDir = getExtractDir(stt);
                 PackInfoJson info = _extract(zipFn, extractDir);
+                this.YamlCustomProperties = info.connector_config;
                 if (info.copy != null)
                 {
                     foreach (CopyInfo ci in info.copy)
                     {
+                        string dest = ci.destination;
+#if DEBUG
+                        dest = string.Concat("/tmp/Netcad/NDU/GUA_test/custom_copy", dest);
+#endif
                         string source = Path.Combine(extractDir, ci.source);
                         if (File.Exists(source))
                         {
-                            File.Copy(source, ci.destination, true);
+                            File.Copy(source, dest, true);
                             File.Delete(source);
+                            this.CustomCopiedFiles.Add(dest);
                         }
                         else if (Directory.Exists(source))
                         {
-                            Helper.CopyDirectory(source, ci.destination, false);
-                            Helper.DeleteDirectory(source);
+                            this.CustomCopiedFiles.AddRange(Helper.CopyDir(source, dest, false));
+                            Helper.DeleteDir(source);
                         }
                         else
-                            throw new Exception($"Cannot copy a file in pack! Source: {source} Destination: {ci.destination}");
+                            throw new Exception($"Cannot copy a file in pack! Source: {source} Destination: {dest}");
                     }
                 }
             }
@@ -172,15 +156,19 @@ namespace Netcad.NDU.GUA.Elements.Items
             {
                 PackInfoJson info;
                 if (PackInfoJson.TryParse(dir, out info))
-                    foreach (var copyItem in info.copy)
+                {
+                    foreach (var ci in info.copy)
                     {
-                        if (Directory.Exists(copyItem.destination))
-                            Helper.DeleteDirectory(copyItem.destination);
-                        else if (File.Exists(copyItem.destination))
-                            File.Delete(copyItem.destination);
+                        string dest = ci.destination;
+#if DEBUG
+                        dest = string.Concat("/tmp/Netcad/NDU/GUA_test/custom_copy", dest);
+#endif
+                        foreach (string fn in this.CustomCopiedFiles)
+                            File.Delete(fn);
+                        this.CustomCopiedFiles.Clear();
                     }
-
-                Helper.DeleteDirectory(dir);
+                }
+                Helper.DeleteDir(dir);
             }
         }
         private void uninstall(ISettings stt)
@@ -213,10 +201,6 @@ namespace Netcad.NDU.GUA.Elements.Items
             public CopyInfo[] copy { get; set; }
             public Dictionary<string, object> connector_config { get; set; }
 
-            public string GetClassName()
-            {
-                return this.connector_config["class"].ToString();
-            }
             private static string getInfoJsonFn(string extractDir)
             {
                 return Path.Combine(extractDir, "info.json");

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Mime;
 using Newtonsoft.Json;
 
@@ -15,23 +17,59 @@ namespace Netcad.NDU.GUA.Utils
             return string.Join(replace, path.Split(Path.GetInvalidPathChars()));
         }
 
-        public static void CopyDirectory(string source, string destination, bool cleanDestination)
+        public static string[] CopyDir(string source, string destination, bool cleanDestination)
         {
             if (cleanDestination)
-                DeleteDirectory(destination);
-            if (!Directory.Exists(destination))
-                Directory.CreateDirectory(destination);
-            Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(source, destination, true);
+                DeleteDir(destination);
+            //return copyDir(source, destination);
+            return copyDir(new DirectoryInfo(source), new DirectoryInfo(destination)).ToArray();
         }
-        public static void MoveDirectory(string source, string destination, bool cleanDestination)
+        private static IEnumerable<string> copyDir(DirectoryInfo source, DirectoryInfo target)
         {
-            if (cleanDestination)
-                DeleteDirectory(destination);
-            if (!Directory.Exists(destination))
-                Directory.CreateDirectory(destination);
-            Microsoft.VisualBasic.FileIO.FileSystem.MoveDirectory(source, destination, true);
+            if (!target.Exists)
+                target.Create();
+
+            foreach (DirectoryInfo dir in source.GetDirectories())
+                foreach (string fn in copyDir(dir, target.CreateSubdirectory(dir.Name)))
+                    yield return fn;
+
+            foreach (FileInfo file in source.GetFiles())
+            {
+                string fn = Path.Combine(target.FullName, file.Name);
+                file.CopyTo(fn);
+                yield return fn;
+            }
         }
-        public static void DeleteDirectory(string dir)
+        // private static IEnumerable<string> copyDir(string source, string destination)
+        // {
+        //     foreach (string dirPath in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+        //         Directory.CreateDirectory(dirPath.Replace(source, destination));
+
+        //     foreach (string newPath in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
+        //     {
+        //         string fn = newPath.Replace(source, destination);
+        //         File.Copy(newPath, fn, true);
+        //         yield return fn;
+        //     }
+        // }
+
+        // public static void CopyDirectory(string source, string destination, bool cleanDestination)
+        // {
+        //     if (cleanDestination)
+        //         DeleteDirectory(destination);
+        //     if (!Directory.Exists(destination))
+        //         Directory.CreateDirectory(destination);
+        //     Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(source, destination, true);
+        // }
+        // public static void MoveDirectory(string source, string destination, bool cleanDestination)
+        // {
+        //     if (cleanDestination)
+        //         DeleteDirectory(destination);
+        //     if (!Directory.Exists(destination))
+        //         Directory.CreateDirectory(destination);
+        //     Microsoft.VisualBasic.FileIO.FileSystem.MoveDirectory(source, destination, true);
+        // }
+        public static void DeleteDir(string dir)
         {
             if (System.IO.Directory.Exists(dir))
             {
@@ -43,7 +81,7 @@ namespace Netcad.NDU.GUA.Utils
                 di.Delete();
             }
         }
-        public static void CleanDirectory(string dir)
+        public static void CleanDir(string dir)
         {
             if (!System.IO.Directory.Exists(dir))
                 System.IO.Directory.CreateDirectory(dir);
@@ -84,12 +122,16 @@ namespace Netcad.NDU.GUA.Utils
         public static void SerializeToJsonFile<T>(T obj, string fileName)
         {
             var settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.TypeNameHandling = TypeNameHandling.Objects;
             File.WriteAllText(fileName, JsonConvert.SerializeObject(obj, Formatting.Indented, settings));
         }
         public static T DeserializeFromJsonFile<T>(string fileName)
         {
-            return JsonConvert.DeserializeObject<T>(File.ReadAllText(fileName));
+            var settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Objects;
+            return JsonConvert.DeserializeObject<T>(File.ReadAllText(fileName), settings);
+            //******
+            // return JsonConvert.DeserializeObject<T>(File.ReadAllText(fileName));
         }
         public static T DeserializeFromJsonText<T>(string jsonText)
         {

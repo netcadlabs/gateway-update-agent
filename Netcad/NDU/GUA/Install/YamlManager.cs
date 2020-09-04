@@ -18,7 +18,7 @@ namespace Netcad.NDU.GUA.Install
         private const string Key_Config = "configuration";
         private const string Key_GUAVersion = "guaVersion";
         private const string Key_Name = "name";
-        private const string Key_ClassName = "class";
+        // private const string Key_ClassName = "class";
         private readonly ILogger logger;
 
         string fn;
@@ -89,9 +89,8 @@ namespace Netcad.NDU.GUA.Install
                         connectors.RemoveAt(i);
                 }
                 foreach (Bundle b in arr)
-                {
-                    connectors.Add(toConnector(b));
-                }
+                    if (b.HasInstalledItem)
+                        connectors.Add(toConnector(b));
 
                 var serializer = new SerializerBuilder().Build();
                 File.WriteAllText(this.fn, serializer.Serialize(yaml));
@@ -110,8 +109,13 @@ namespace Netcad.NDU.GUA.Install
             dic.Add(Key_Name, $"{b.Type} Connector");
             dic.Add(Key_Type, $"{b.Type}");
             dic.Add(Key_Config, $"{b.Type}.json");
-            if (!string.IsNullOrWhiteSpace(b.ClassName))
-                dic.Add(Key_ClassName, b.ClassName);
+
+            // string className = b.ClassName;
+            // if (!string.IsNullOrWhiteSpace(className))
+            //     dic.Add(Key_ClassName, className);
+            foreach (var kv in b.GetYamlCustomProperties())
+                dic.Add(kv.Key, kv.Value);
+
             dic.Add(Key_GUAVersion, b.GUAVersion);
             return dic;
         }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Netcad.NDU.GUA.Settings;
 
 namespace Netcad.NDU.GUA.Elements.Items
@@ -9,6 +10,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         int Version { get; set; }
         string URL { get; set; }
         States State { get; set; }
+        Dictionary<string, object> YamlCustomProperties { get; }
 
         void Save(string fileName);
         void DownloadIfRequired(ISettings stt);

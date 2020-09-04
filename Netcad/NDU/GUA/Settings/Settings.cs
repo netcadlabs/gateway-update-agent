@@ -30,6 +30,7 @@ namespace Netcad.NDU.GUA.Settings
 
 #if DEBUG
         private string fileName;
+        private static bool _firstRun = true;
 #else
         private const string fileName = @"/etc/GatewayUpdateAgent/GatewayUpdateAgent.conf";
 #endif
@@ -58,16 +59,22 @@ namespace Netcad.NDU.GUA.Settings
 
 #if DEBUG
                 string testDir = @"/tmp/Netcad/NDU/GUA_test";
-                // string sourceDir = Path.Combine(assemblyFolder, @"test");
-                // Helper.CopyDirectory(sourceDir, testDir, true);
+                
+                if (_firstRun)
+                {
+                    _firstRun = false;
+                    string sourceDir = Path.Combine(assemblyFolder, @"test");
+                    Helper.CopyDir(sourceDir, testDir, true);
+                }
+
                 this._config.YamlFileName = Path.Combine(testDir, @"tb_gateway.yaml");
                 this._config.ConfigFolder = Path.Combine(testDir, @"configs");
                 this._config.ExtensionFolder = Path.Combine(testDir, @"extensions");
 #endif
-                if(!Directory.Exists(this.ExtensionFolder))
+                if (!Directory.Exists(this.ExtensionFolder))
                     Directory.CreateDirectory(this.ExtensionFolder);
                 this.HistoryFolder = Path.Combine(this.ExtensionFolder, "_GUA_History");
-                if(!Directory.Exists(this.HistoryFolder))
+                if (!Directory.Exists(this.HistoryFolder))
                     Directory.CreateDirectory(this.HistoryFolder);
             }
             catch (Exception ex)

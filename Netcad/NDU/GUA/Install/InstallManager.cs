@@ -121,8 +121,8 @@ namespace Netcad.NDU.GUA.Install
             {
                 foreach (string dir in Directory.EnumerateDirectories(this.bundlesFolder))
                 {
-                    string type = Path.GetDirectoryName(dir);
-                    dic.Add(type, Bundle.Load(dir));
+                    Bundle b = Bundle.Load(dir);
+                    dic.Add(b.Type, b);
                 }
             }
             return dic;

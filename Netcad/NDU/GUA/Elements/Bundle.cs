@@ -17,12 +17,44 @@ namespace Netcad.NDU.GUA.Elements
         private Dictionary<string, IItem> items;
         public string Type { get => this.lite.Type; set => this.lite.Type = value; }
         public string GUAVersion { get => this.lite.GUAVersion; set => this.lite.GUAVersion = value; }
-        public string ClassName { get => this.lite.ClassName; set => this.lite.ClassName = value; }
+        public Dictionary<string, object> GetYamlCustomProperties() //******
+        {
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+            if (this.items != null)
+                foreach (IItem item in this.items.Values)
+                {
+                    Dictionary<string, object> d = item.YamlCustomProperties;
+                    if (d != null)
+                        foreach (string key in d.Keys)
+                        {
+                            if (!dic.ContainsKey(key))
+                                dic.Add(key, d[key]);
+                            else
+                            {
+                                if (d[key] != dic[key])
+                                    throw new Exception($"There is a conflict in the info.json connector_config values. Type: {this.Type} key: {key} value1: {dic[key]} value2: {d[key]}");
+                            }
+                        }
+                }
+            return dic;
+        }
         public string Name
         {
             get
             {
                 return string.Concat(this.Type, " Connector");
+            }
+        }
+
+        public bool HasInstalledItem
+        {
+            get
+            {
+                if (this.items != null)
+                    foreach (IItem item in this.items.Values)
+                        if (item.Category == Category.Command || item.State == States.Installed)
+                            return true;
+                return false;
             }
         }
 
@@ -71,7 +103,7 @@ namespace Netcad.NDU.GUA.Elements
             else
             {
                 IItem item = this.items[u.ID];
-                if (item.Version >= u.Version)
+                if (item.Version == u.Version)
                 {
                     if (item.State == States.Installed)
                         return false;
@@ -80,21 +112,37 @@ namespace Netcad.NDU.GUA.Elements
                         item.State = States.ActivateRequired;
                         return true;
                     }
-                    else
-                    {
-                        item.Version = u.Version;
-                        item.URL = u.Url;
-                        item.State = States.DownloadRequired;
-                        return true;
-                    }
                 }
-                else
-                {
-                    item.Version = u.Version;
-                    item.URL = u.Url;
-                    item.State = States.DownloadRequired;
-                    return true;
-                }
+                item.Version = u.Version;
+                item.URL = u.Url;
+                item.State = States.DownloadRequired;
+                return true;
+
+                // IItem item = this.items[u.ID];
+                // if (item.Version >= u.Version)
+                // {
+                //     if (item.State == States.Installed)
+                //         return false;
+                //     else if (item.State == States.Deactivated)
+                //     {
+                //         item.State = States.ActivateRequired;
+                //         return true;
+                //     }
+                //     else
+                //     {
+                //         item.Version = u.Version;
+                //         item.URL = u.Url;
+                //         item.State = States.DownloadRequired;
+                //         return true;
+                //     }
+                // }
+                // else
+                // {
+                //     item.Version = u.Version;
+                //     item.URL = u.Url;
+                //     item.State = States.DownloadRequired;
+                //     return true;
+                // }
             }
         }
         internal bool IsUninstallOrDeactivationRequired(Dictionary<string, UpdateInfo> dicIdUpdates)
@@ -180,7 +228,7 @@ namespace Netcad.NDU.GUA.Elements
 
             this.GUAVersion = guaVersion;
             string fn = getLiteFn(dir);
-            Helper.SerializeToJsonFile(this, fn);
+            Helper.SerializeToJsonFile(this.lite, fn);
 
             this.saveItems(dir);
         }
@@ -199,8 +247,10 @@ namespace Netcad.NDU.GUA.Elements
         private const string itemJsonFileName = "item.json";
         private static string getItemFileName(string dir, IItem item)
         {
-            string subDir = Helper.ReplaceInvalidPathChars(item.ID, "_");
-            return Path.Combine(dir, subDir, itemJsonFileName);
+            string subDir = Path.Combine(dir, Helper.ReplaceInvalidPathChars(item.ID, "_"));
+            if (!Directory.Exists(subDir))
+                Directory.CreateDirectory(subDir);
+            return Path.Combine(subDir, itemJsonFileName);
         }
         private void saveItems(string dir)
         {
@@ -235,7 +285,6 @@ namespace Netcad.NDU.GUA.Elements
         {
             public string Type { get; set; }
             public string GUAVersion { get; set; }
-            public string ClassName { get; set; }
         }
     }
 }
