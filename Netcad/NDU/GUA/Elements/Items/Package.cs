@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Settings;
 using Netcad.NDU.GUA.Utils;
 
@@ -12,7 +13,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 {
     internal class Package : IItem
     {
-        #region Model
+        #region Model      
         public string ID { get; set; }
         public Category Category => Category.Package;
         public int Version { get; set; }
@@ -49,13 +50,15 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Download
 
-        public void DownloadIfRequired(ISettings stt)
+        public void DownloadIfRequired(ISettings stt, ILogger logger)
         {
             if (this.State == States.DownloadRequired)
             {
                 string fn = getZipFileName(stt);
                 if (File.Exists(fn))
                     File.Delete(fn);
+
+                logger.LogInformation($"Downloading Package...  Type:{this.URL}");
 
                 var webClient = new WebClient();
                 webClient.DownloadFile(this.URL, fn);
@@ -71,7 +74,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Update
 
-        public void UpdateIfRequired(ServiceState ss, ISettings stt)
+        public void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
         {
             if (ss == ServiceState.Stopped)
             {
@@ -90,11 +93,11 @@ namespace Netcad.NDU.GUA.Elements.Items
                         this.State = States.Deactivated;
                         break;
                     case (States.ActivateRequired):
-                        this.activate(stt);
+                        this.activate(stt, logger);
                         this.State = States.Installed;
                         break;
                     case (States.DownloadRequired):
-                        this.DownloadIfRequired(stt);
+                        this.DownloadIfRequired(stt, logger);
                         this.install(stt);
                         this.State = States.Installed;
                         break;
@@ -178,13 +181,13 @@ namespace Netcad.NDU.GUA.Elements.Items
             if (File.Exists(zipFn))
                 File.Delete(zipFn);
         }
-        private void activate(ISettings stt)
+        private void activate(ISettings stt, ILogger logger)
         {
             string zipFn = getZipFileName(stt);
             if (!File.Exists(zipFn))
             {
                 this.State = States.DownloadRequired;
-                this.DownloadIfRequired(stt);
+                this.DownloadIfRequired(stt, logger);
                 this.install(stt);
             }
             else

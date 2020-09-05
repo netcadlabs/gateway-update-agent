@@ -8,27 +8,21 @@ namespace Netcad.NDU.GUA.Utils
 {
     internal static class ShellHelper
     {
-        public static void StopTbProcess(ILogger logger)
+        public static string StopTbProcess()
         {
 #if DEBUG
-            return;
-#endif
-            logger.LogInformation("Stopping thingsboard-gateway.service!");
+            return "";
+#endif            
             RunCommand("sudo systemctl stop thingsboard-gateway.service");
-
-            string res = RunCommand("sudo systemctl status thingsboard-gateway.service");
-            logger.LogInformation($"Status: {res}");
+            return RunCommand("sudo systemctl status thingsboard-gateway.service");           
         }
-        public static void StartTbProcess(ILogger logger)
+        public static string StartTbProcess()
         {
 #if DEBUG
-            return;
+            return "";
 #endif
-            logger.LogInformation("Starting thingsboard-gateway.service...");
             RunCommand("sudo systemctl start thingsboard-gateway.service");
-
-            string res = RunCommand("sudo systemctl status thingsboard-gateway.service");
-            logger.LogInformation($"Status: {res}");
+            return RunCommand("sudo systemctl status thingsboard-gateway.service");            
         }
         public static string RunCommand(string cmd)
         {

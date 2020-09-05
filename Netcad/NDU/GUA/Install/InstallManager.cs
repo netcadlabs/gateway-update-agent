@@ -65,29 +65,33 @@ namespace Netcad.NDU.GUA.Install
                 {
                     Parallel.ForEach(dirty, (Bundle b) =>
                     {
-                        b.DownloadIfRequired(this.settings);
+                        b.DownloadIfRequired(this.settings, this.logger);
                     });
 
                     foreach (Bundle b in dirty)
-                        b.UpdateIfRequired(ServiceState.BeforeStop, this.settings);
+                        b.UpdateIfRequired(ServiceState.BeforeStop, this.settings, this.logger);
 
                     try
                     {
-                        ShellHelper.StopTbProcess(this.logger);
+                        logger.LogInformation("Stopping thingsboard-gateway.service!");
+                        string status = ShellHelper.StopTbProcess();
+                        logger.LogInformation($"Status: {status}");
 
                         foreach (Bundle b in dirty)
-                            b.UpdateIfRequired(ServiceState.Stopped, this.settings);
+                            b.UpdateIfRequired(ServiceState.Stopped, this.settings, this.logger);
 
                         YamlManager yamlMan = new YamlManager(this.settings.YamlFileName, this.guaVersion, this.logger);
                         yamlMan.UpdateConnectors(bundles.Values.ToArray());
                     }
                     finally
                     {
-                        ShellHelper.StartTbProcess(this.logger);
+                        logger.LogInformation("Starting thingsboard-gateway.service...");
+                        string status = ShellHelper.StartTbProcess();
+                        logger.LogInformation($"Status: {status}");
                     }
 
                     foreach (Bundle b in dirty)
-                        b.UpdateIfRequired(ServiceState.Started, this.settings);
+                        b.UpdateIfRequired(ServiceState.Started, this.settings, this.logger);
 
                     if (!Directory.Exists(this.bundlesFolder))
                         Directory.CreateDirectory(this.bundlesFolder);
@@ -110,6 +114,10 @@ namespace Netcad.NDU.GUA.Install
             if (errors.Count > 0)
             {
                 //**** call api
+
+                foreach (Exception ex in errors)
+                    logger.LogError(ex, "Error in CheckUpdates");
+
             }
 
         }

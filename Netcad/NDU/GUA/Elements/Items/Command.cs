@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Settings;
 using Netcad.NDU.GUA.Utils;
 
@@ -62,7 +63,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Download
 
-        public void DownloadIfRequired(ISettings stt)
+        public void DownloadIfRequired(ISettings stt, ILogger logger)
         {
             if (this.State == States.DownloadRequired)
             {
@@ -70,6 +71,8 @@ namespace Netcad.NDU.GUA.Elements.Items
                 if (File.Exists(fn))
                     File.Delete(fn);
 
+                logger.LogInformation($"Downloading Command...  Type:{this.URL}");
+                
                 var webClient = new WebClient();
                 webClient.DownloadFile(this.URL, fn);
 
@@ -84,7 +87,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Update
 
-        public void UpdateIfRequired(ServiceState ss, ISettings stt)
+        public void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
         {
             switch (this.State)
             {
@@ -103,7 +106,7 @@ namespace Netcad.NDU.GUA.Elements.Items
                     this.activate(ss, stt);
                     break;
                 case (States.DownloadRequired):
-                    this.DownloadIfRequired(stt);
+                    this.DownloadIfRequired(stt, logger);
                     this.State = States.Downloaded;
                     this.install(ss, stt);
                     break;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Settings;
 using Netcad.NDU.GUA.Utils;
 
@@ -52,13 +53,15 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Download
 
-        public void DownloadIfRequired(ISettings stt)
+        public void DownloadIfRequired(ISettings stt, ILogger logger)
         {
             if (this.State == States.DownloadRequired)
             {
                 string fn = getDownloadFileName(stt);
                 if (File.Exists(fn))
                     File.Delete(fn);
+
+                logger.LogInformation($"Downloading Config...  Type:{this.URL}");
 
                 var webClient = new WebClient();
                 webClient.DownloadFile(this.URL, fn);
@@ -74,7 +77,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Update
 
-        public void UpdateIfRequired(ServiceState ss, ISettings stt)
+        public void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
         {
             if (ss == ServiceState.Stopped)
             {
@@ -93,11 +96,11 @@ namespace Netcad.NDU.GUA.Elements.Items
                         this.State = States.Deactivated;
                         break;
                     case (States.ActivateRequired):
-                        this.activate(stt);
+                        this.activate(stt, logger);
                         this.State = States.Installed;
                         break;
                     case (States.DownloadRequired):
-                        this.DownloadIfRequired(stt);
+                        this.DownloadIfRequired(stt, logger);
                         this.install(stt);
                         this.State = States.Installed;
                         break;
@@ -134,13 +137,13 @@ namespace Netcad.NDU.GUA.Elements.Items
             if (File.Exists(fn))
                 File.Delete(fn);
         }
-        private void activate(ISettings stt)
+        private void activate(ISettings stt, ILogger logger)
         {
             string fn = getDownloadFileName(stt);
             if (!File.Exists(fn))
             {
                 this.State = States.DownloadRequired;
-                this.DownloadIfRequired(stt);
+                this.DownloadIfRequired(stt, logger);
                 this.install(stt);
             }
             else

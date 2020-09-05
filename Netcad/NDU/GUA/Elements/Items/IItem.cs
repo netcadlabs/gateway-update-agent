@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Settings;
 
 namespace Netcad.NDU.GUA.Elements.Items
@@ -13,7 +14,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         Dictionary<string, object> YamlConnectorItems { get; }
 
         void Save(string fileName);
-        void DownloadIfRequired(ISettings stt);
-        void UpdateIfRequired(ServiceState ss, ISettings stt);
+        void DownloadIfRequired(ISettings stt, ILogger logger);
+        void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger);
     }
 }

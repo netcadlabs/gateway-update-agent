@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Elements.Items;
 using Netcad.NDU.GUA.Settings;
 using Netcad.NDU.GUA.Utils;
@@ -144,13 +145,13 @@ namespace Netcad.NDU.GUA.Elements
             return res;
         }
 
-        internal void DownloadIfRequired(ISettings stt)
+        internal void DownloadIfRequired(ISettings stt, ILogger logger)
         {
             Parallel.ForEach(this.items.Values, (IItem item) =>
             {
                 try
                 {
-                    item.DownloadIfRequired(stt);
+                    item.DownloadIfRequired(stt, logger);
                 }
                 catch (Exception ex)
                 {
@@ -159,13 +160,13 @@ namespace Netcad.NDU.GUA.Elements
             });
         }
 
-        internal void UpdateIfRequired(ServiceState ss, ISettings stt)
+        internal void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
         {
             foreach (IItem item in this.items.Values)
             {
                 try
                 {
-                    item.UpdateIfRequired(ss, stt);
+                    item.UpdateIfRequired(ss, stt, logger);
                 }
                 catch (Exception ex)
                 {
