@@ -17,13 +17,13 @@ namespace Netcad.NDU.GUA.Elements
         private Dictionary<string, IItem> items;
         public string Type { get => this.lite.Type; set => this.lite.Type = value; }
         public string GUAVersion { get => this.lite.GUAVersion; set => this.lite.GUAVersion = value; }
-        public Dictionary<string, object> GetYamlCustomProperties() //******
+        public Dictionary<string, object> GetYamlCustomProperties()
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
             if (this.items != null)
                 foreach (IItem item in this.items.Values)
                 {
-                    Dictionary<string, object> d = item.YamlCustomProperties;
+                    Dictionary<string, object> d = item.YamlConnectorItems;
                     if (d != null)
                         foreach (string key in d.Keys)
                         {
@@ -117,32 +117,6 @@ namespace Netcad.NDU.GUA.Elements
                 item.URL = u.Url;
                 item.State = States.DownloadRequired;
                 return true;
-
-                // IItem item = this.items[u.ID];
-                // if (item.Version >= u.Version)
-                // {
-                //     if (item.State == States.Installed)
-                //         return false;
-                //     else if (item.State == States.Deactivated)
-                //     {
-                //         item.State = States.ActivateRequired;
-                //         return true;
-                //     }
-                //     else
-                //     {
-                //         item.Version = u.Version;
-                //         item.URL = u.Url;
-                //         item.State = States.DownloadRequired;
-                //         return true;
-                //     }
-                // }
-                // else
-                // {
-                //     item.Version = u.Version;
-                //     item.URL = u.Url;
-                //     item.State = States.DownloadRequired;
-                //     return true;
-                // }
             }
         }
         internal bool IsUninstallOrDeactivationRequired(Dictionary<string, UpdateInfo> dicIdUpdates)
@@ -200,12 +174,12 @@ namespace Netcad.NDU.GUA.Elements
             }
         }
 
-        private static IItem createItem(Category c)
+        private IItem createItem(Category c)
         {
             switch (c)
             {
                 case Category.Config:
-                    return new Config();
+                    return new Config(this.Type);
                 case Category.Package:
                     return new Package();
                 case Category.Command:

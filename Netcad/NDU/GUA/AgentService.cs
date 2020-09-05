@@ -7,19 +7,23 @@ using Netcad.NDU.GUA.Settings;
 using Netcad.NDU.GUA.Updater;
 using Netcad.NDU.GUA.Utils;
 
-namespace Netcad.NDU.GUA {
-    public class AgentService : BackgroundService {
+namespace Netcad.NDU.GUA
+{
+    public class AgentService : BackgroundService
+    {
 
         private readonly ILogger<AgentService> _logger;
         private readonly IUpdater _updater;
         private readonly ISettings _settings;
 
-        public AgentService(ILogger<AgentService> logger, IUpdater updater, ISettings settings) {
+        public AgentService(ILogger<AgentService> logger, IUpdater updater, ISettings settings)
+        {
             _logger = logger;
             _updater = updater;
             _settings = settings;
         }
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
             _logger.LogDebug($"AgentService is starting.");
 
             stoppingToken.Register(() =>
@@ -27,14 +31,19 @@ namespace Netcad.NDU.GUA {
 
             int msec = (int)(Helper.ParseDouble(_settings.IntervalInMinutes, 30) * 60000d);
 
-            while (!stoppingToken.IsCancellationRequested) {
+            while (!stoppingToken.IsCancellationRequested)
+            {
                 _logger.LogDebug($"AgentService task doing background work.");
 
-                try {
+                try
+                {
                     _updater.Tick("token_sample");
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
 
                     _logger.LogError(e, "");
+                    _logger.LogInformation($"Error Message: { e.Message}");
                 }
 
                 await Task.Delay(msec, stoppingToken);

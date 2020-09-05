@@ -18,7 +18,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         public int Version { get; set; }
         public string URL { get; set; }
         public States State { get; set; }
-        public Dictionary<string, object> YamlCustomProperties { get; set; }
+        public Dictionary<string, object> YamlConnectorItems { get; set; }
         public List<string> CustomCopiedFiles = new List<string>();
 
         public void Save(string fileName)
@@ -39,7 +39,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         }
         private string getZipFileName(ISettings stt)
         {
-            string dir = Path.Combine(stt.ExtensionFolder, "_package_downloads", _getIdForDir());
+            string dir = Path.Combine(stt.HistoryFolder, "_package_downloads", _getIdForDir());
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             string name = string.Concat("pack_", Helper.ReplaceInvalidFileNameChars(this.ID, "_"), ".zip");
@@ -122,7 +122,7 @@ namespace Netcad.NDU.GUA.Elements.Items
             {
                 string extractDir = getExtractDir(stt);
                 PackInfoJson info = _extract(zipFn, extractDir);
-                this.YamlCustomProperties = info.connector_config;
+                this.YamlConnectorItems = info.connector_config;
                 if (info.copy != null)
                 {
                     foreach (CopyInfo ci in info.copy)

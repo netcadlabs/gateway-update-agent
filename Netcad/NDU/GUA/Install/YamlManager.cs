@@ -15,7 +15,7 @@ namespace Netcad.NDU.GUA.Install
     {
         private const string Key_Connectors = "connectors";
         private const string Key_Type = "type";
-        private const string Key_Config = "configuration";
+        //****private const string Key_Config = "configuration";
         private const string Key_GUAVersion = "guaVersion";
         private const string Key_Name = "name";
         // private const string Key_ClassName = "class";
@@ -108,7 +108,7 @@ namespace Netcad.NDU.GUA.Install
             Dictionary<object, object> dic = new Dictionary<object, object>();
             dic.Add(Key_Name, $"{b.Type} Connector");
             dic.Add(Key_Type, $"{b.Type}");
-            dic.Add(Key_Config, $"{b.Type}.json");
+            //****dic.Add(Key_Config, $"{b.Type}.json");
 
             // string className = b.ClassName;
             // if (!string.IsNullOrWhiteSpace(className))

@@ -130,8 +130,6 @@ namespace Netcad.NDU.GUA.Utils
             var settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Objects;
             return JsonConvert.DeserializeObject<T>(File.ReadAllText(fileName), settings);
-            //******
-            // return JsonConvert.DeserializeObject<T>(File.ReadAllText(fileName));
         }
         public static T DeserializeFromJsonText<T>(string jsonText)
         {

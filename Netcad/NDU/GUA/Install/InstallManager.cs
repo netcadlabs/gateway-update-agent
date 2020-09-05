@@ -73,7 +73,7 @@ namespace Netcad.NDU.GUA.Install
 
                     try
                     {
-                        Shell.StopTbProcess(this.logger);
+                        ShellHelper.StopTbProcess(this.logger);
 
                         foreach (Bundle b in dirty)
                             b.UpdateIfRequired(ServiceState.Stopped, this.settings);
@@ -83,7 +83,7 @@ namespace Netcad.NDU.GUA.Install
                     }
                     finally
                     {
-                        Shell.StartTbProcess(this.logger);
+                        ShellHelper.StartTbProcess(this.logger);
                     }
 
                     foreach (Bundle b in dirty)

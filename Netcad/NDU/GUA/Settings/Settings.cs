@@ -18,8 +18,7 @@ namespace Netcad.NDU.GUA.Settings
 
         public string HistoryFolder { get; private set; }
         public Version GUAVersion { get; private set; }
-        //****public string TempFolder { get; private set; }
-
+       
         public readonly ILogger<Settings> _logger;
 
         public Settings(ILogger<Settings> logger)
@@ -52,10 +51,10 @@ namespace Netcad.NDU.GUA.Settings
 #endif
                 this._config = Helper.DeserializeFromJsonFile<config>(fileName);
                 if (string.IsNullOrWhiteSpace(this._config.Hostname))
-                    throw new Exception($"No Hostname definden in {fileName}");
+                throw new Exception($"No Hostname definden in {fileName}");
                 if (!string.IsNullOrWhiteSpace(this._config.Token) && !this._config.Hostname.EndsWith("/"))
                     this._config.Hostname += "/";
-                //*****this.TempFolder = @"/tmp/Netcad/NDU/GUA/temp";
+                
 
 #if DEBUG
                 string testDir = @"/tmp/Netcad/NDU/GUA_test";

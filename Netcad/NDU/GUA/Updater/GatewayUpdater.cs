@@ -1,35 +1,40 @@
-using System.Runtime.CompilerServices;
 using System;
 using System.Net;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Elements;
 using Netcad.NDU.GUA.Install;
 using Netcad.NDU.GUA.Settings;
-using Newtonsoft.Json;
 using Netcad.NDU.GUA.Utils;
+using Newtonsoft.Json;
 
-namespace Netcad.NDU.GUA.Updater {
-    public class GatewayUpdater : IUpdater {
+namespace Netcad.NDU.GUA.Updater
+{
+    public class GatewayUpdater : IUpdater
+    {
         private readonly ILogger<GatewayUpdater> logger;
         private readonly ISettings settings;
         private readonly IInstallManager installManager;
 
-        public GatewayUpdater(ILogger<GatewayUpdater> logger, ISettings settings, IInstallManager installManager) {
+        public GatewayUpdater(ILogger<GatewayUpdater> logger, ISettings settings, IInstallManager installManager)
+        {
             this.logger = logger;
             this.settings = settings;
             this.installManager = installManager;
         }
 
         int _tick;
-        void IUpdater.Tick(string gatewayToken) {
+        void IUpdater.Tick(string gatewayToken)
+        {
             logger.LogInformation($"Tick ... {++_tick}");
-            //if (_test % 100 == 0) throw new Exception("test ex");
+
+            // if (_tick % 10 == 0)throw new Exception("test ex");
 
             checkUpdates();
-            //checkYaml();
         }
 
-        private void checkUpdates() {
+        private void checkUpdates()
+        {
             settings.ReloadIfRequired();
             string url = string.Concat(settings.Hostname, settings.Token);
 
@@ -37,9 +42,12 @@ namespace Netcad.NDU.GUA.Updater {
             string bundlesArrayJson = webClient.DownloadString(url);
 
             UpdateInfo[] updates = null;
-            try {
+            try
+            {
                 updates = Helper.DeserializeFromJsonText<UpdateInfo[]>(bundlesArrayJson);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 throw new Exception($"Error while parsing bundles! API response:{bundlesArrayJson}", ex);
             }
             this.installManager.CheckUpdates(updates);

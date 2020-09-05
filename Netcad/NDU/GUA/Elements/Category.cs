@@ -1,9 +1,9 @@
 namespace Netcad.NDU.GUA.Elements
 {
-    public enum Category
+    public enum Category : int
     {
-        Config,
-        Package,
-        Command
+        Config = 0,
+        Package = 1,
+        Command = 2
     }
 }
