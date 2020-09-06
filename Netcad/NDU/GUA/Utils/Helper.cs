@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -135,5 +136,20 @@ namespace Netcad.NDU.GUA.Utils
         {
             return JsonConvert.DeserializeObject<T>(jsonText);
         }
+
+        public static string CombineUrl(params string[] items)
+        {
+            if (items != null && items.Length > 0)
+            {
+                Uri uri = new Uri(items[0]);
+                for (int i = 1; i < items.Length; i++)
+                {
+                    uri = new Uri(uri, items[i]);
+                }
+                return uri.ToString();
+            }
+            return string.Empty;
+        }
+
     }
 }

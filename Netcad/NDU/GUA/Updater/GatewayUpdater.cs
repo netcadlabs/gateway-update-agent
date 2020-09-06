@@ -37,13 +37,9 @@ namespace Netcad.NDU.GUA.Updater
         private void checkUpdates()
         {
             settings.ReloadIfRequired();
-            //string url = string.Concat(settings.Hostname, suffix, settings.Token);
-            Uri uri0 = new Uri(settings.Hostname);
-            Uri uri1 = new Uri(uri0, suffix);
-            Uri uri = new Uri(uri1, settings.Token);
-
+            string url = Helper.CombineUrl(settings.Hostname, suffix, settings.Token);
             var webClient = new WebClient();
-            string bundlesArrayJson = webClient.DownloadString(uri);
+            string bundlesArrayJson = webClient.DownloadString(url);
 
             UpdateInfo[] updates = null;
             try

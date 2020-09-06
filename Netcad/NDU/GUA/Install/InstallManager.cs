@@ -38,9 +38,8 @@ namespace Netcad.NDU.GUA.Install
                     throw new NotImplementedException();
             }
             else
-            {
-                //******** Uri u1 = new Uri("")
-                return string.Concat(this.settings.Hostname, "api/gus/downloads/", url);
+            {                
+                return Helper.CombineUrl(this.settings.Hostname, "/api/gus/downloads/", url);
             }
         }
         public void CheckUpdates(IEnumerable<UpdateInfo> updates)
