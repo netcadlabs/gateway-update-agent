@@ -27,6 +27,22 @@ namespace Netcad.NDU.GUA.Install
                 Directory.CreateDirectory(this.bundlesFolder);
         }
 
+        private string validateDownloadUrl(string url)
+        {
+            Uri uriResult;
+            if (Uri.TryCreate(url, UriKind.Absolute, out uriResult))
+            {
+                if ((uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+                    return url;
+                else
+                    throw new NotImplementedException();
+            }
+            else
+            {
+                //******** Uri u1 = new Uri("")
+                return string.Concat(this.settings.Hostname, "api/gus/downloads/", url);
+            }
+        }
         public void CheckUpdates(IEnumerable<UpdateInfo> updates)
         {
             List<Exception> errors = new List<Exception>();
@@ -37,13 +53,19 @@ namespace Netcad.NDU.GUA.Install
                 Dictionary<string, UpdateInfo> dicIdUpdates = new Dictionary<string, UpdateInfo>();
                 foreach (UpdateInfo u in updates)
                 {
-                    if (dicIdUpdates.ContainsKey(u.ID))
+                    if (string.IsNullOrWhiteSpace(u.Url))
                     {
-                        errors.Add(new Exception($"Update item has a duplicated ID. Type: {u.Type} ID: {u.ID}"));
+                        errors.Add(new Exception($"Update item url is null. Type: {u.Type} ID: {u.UUID}"));
+                        continue;
+                    }
+                    u.Url = validateDownloadUrl(u.Url);
+                    if (dicIdUpdates.ContainsKey(u.UUID))
+                    {
+                        errors.Add(new Exception($"Update item has a duplicated ID. Type: {u.Type} ID: {u.UUID}"));
                         continue;
                     }
                     else
-                        dicIdUpdates.Add(u.ID, u);
+                        dicIdUpdates.Add(u.UUID, u);
 
                     Bundle b;
                     if (!bundles.TryGetValue(u.Type, out b))

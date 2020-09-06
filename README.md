@@ -52,35 +52,35 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
 [
     {
         "type": "sigara",
-        "id": "uuid-1",
+        "uuid": "uuid-1",
         "url": "https://.../config.json",
         "category": "CONFIG",
         "version": 23,
     },
     {
         "type": "sigara",
-        "id": "uuid-2",
+        "uuid": "uuid-2",
         "url": "https://.../sigara-framework.zip",
         "category": "PACKAGE",
         "version": 5,
     },
     {
         "type": "sigara",
-        "id": "uuid-3",
+        "uuid": "uuid-3",
         "url": "https://.../sigara-model-data.zip",
         "category": "PACKAGE",
         "version": 2,
     },
     {
         "type": "sigara",
-        "id": "uuid-4",
+        "uuid": "uuid-4",
         "url": "https://.../sigara-kamera-komutları.zip",
         "category": "COMMAND",
         "version": 1,
     },
     {
         "type": "sigara",
-        "id": "uuid-5",
+        "uuid": "uuid-5",
         "url": "https://.../sigara-model-komutları.zip",
         "category": "COMMAND",
         "version": 1,
@@ -133,7 +133,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
 
 * GW Update Agent, API'den gelen bilgiyi şu şekilde değerlendirir:
   * API'nin döndüğü listede bulunan ancak gateway'e henüz kurulmamış olan elemanları indirir; indirmesi başarılı olanları kurar.
-  * API'nın döndüğü listede bulunan, gateway'e kurulmuş ve versiyonu daha düşük olan elemanları önce kaldırır, sonra kurar.
+  * API'nın döndüğü listede bulunan, gateway'e kurulmuş ve versiyonu farklı olan elemanları önce kaldırır, sonra kurar.
   * API'nin döndüğü listede bulunmayan ancak gateway'e kurulmuş olan elemanlar için:
     * **CONFIG** elemanlar için oluşturulan json dosyalarını aktif olmayan elemanlar için kullanılan bir dizine taşır. Yani config deaktive edilir.
     * **PACKAGE** içeriği ile gelen tim dosyalar aktif olmayan elemanlar için kullanılan bir dizine taşınır. Yani package deaktive edilir.

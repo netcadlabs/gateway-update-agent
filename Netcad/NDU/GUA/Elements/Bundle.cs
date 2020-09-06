@@ -67,15 +67,15 @@ namespace Netcad.NDU.GUA.Elements
 
         #region Errors
         private Dictionary<string, List<Exception>> _errors = new Dictionary<string, List<Exception>>();
-        private void setError(string id, Exception ex)
+        private void setError(string uuid, Exception ex)
         {
-            lock(this._errors)
+            lock (this._errors)
             {
                 List<Exception> lst;
-                if (!this._errors.TryGetValue(id, out lst))
+                if (!this._errors.TryGetValue(uuid, out lst))
                 {
                     lst = new List<Exception>();
-                    this._errors.Add(id, lst);
+                    this._errors.Add(uuid, lst);
                 }
                 lst.Add(ex);
             }
@@ -91,27 +91,33 @@ namespace Netcad.NDU.GUA.Elements
 
         internal bool IsUpdateRequired(UpdateInfo u)
         {
-            if (!this.items.ContainsKey(u.ID))
+            if (!this.items.ContainsKey(u.UUID))
             {
                 IItem item = createItem(u.Category);
-                item.ID = u.ID;
+                item.ID = u.UUID;
                 item.Version = u.Version;
                 item.URL = u.Url;
                 item.State = States.DownloadRequired;
-                this.items.Add(u.ID, item);
+                this.items.Add(u.UUID, item);
                 return true;
             }
             else
             {
-                IItem item = this.items[u.ID];
+                IItem item = this.items[u.UUID];
                 if (item.Version == u.Version)
                 {
-                    if (item.State == States.Installed)
-                        return false;
-                    else if (item.State == States.Deactivated)
+                    switch (item.State)
                     {
-                        item.State = States.ActivateRequired;
-                        return true;
+                        case States.Installed:
+                            return false;
+
+                        case States.Deactivated:
+                            item.State = States.ActivateRequired;
+                            return true;
+
+                        case States.ActivateRequired:
+                        case States.Downloaded:
+                            return true;
                     }
                 }
                 item.Version = u.Version;

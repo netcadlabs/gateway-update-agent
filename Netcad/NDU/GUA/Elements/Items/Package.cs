@@ -61,6 +61,7 @@ namespace Netcad.NDU.GUA.Elements.Items
                 logger.LogInformation($"Downloading Package...  Type:{this.URL}");
 
                 var webClient = new WebClient();
+
                 webClient.DownloadFile(this.URL, fn);
 
                 if (!File.Exists(fn))
@@ -69,7 +70,7 @@ namespace Netcad.NDU.GUA.Elements.Items
                     this.State = States.Downloaded;
             }
         }
-
+      
         #endregion
 
         #region Update

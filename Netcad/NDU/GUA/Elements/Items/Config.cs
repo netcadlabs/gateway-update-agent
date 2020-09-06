@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Settings;
@@ -44,10 +45,14 @@ namespace Netcad.NDU.GUA.Elements.Items
         }
         private string getDownloadFileName(ISettings stt)
         {
+            return Path.Combine(getDownloadDir(stt), "config.zip");
+        }
+        private string getDownloadDir(ISettings stt)
+        {
             string dir = Path.Combine(stt.HistoryFolder, "_config_downloads", Helper.ReplaceInvalidPathChars(string.Concat(this.Type, "_", this.ID), "_"));
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
-            return Path.Combine(dir, _getNameForConfigFile());
+            return dir;
         }
         #endregion
 
@@ -116,9 +121,16 @@ namespace Netcad.NDU.GUA.Elements.Items
                 throw new Exception($"Downloaded file does not exist: {dFn}");
             else
             {
+                string extractDir = Path.Combine(getDownloadDir(stt), "extract");
+                Helper.DeleteDir(extractDir);
+                ZipFile.ExtractToDirectory(dFn, extractDir);
+                string configFn = Path.Combine(extractDir, "config.json");
+                if (!File.Exists(configFn))
+                    throw new Exception($"config.json file not exits in the zip file... url:{this.URL}");
+                
                 string name = _getNameForConfigFile();
                 string fn = getConfFileName(stt);
-                File.Copy(dFn, fn);
+                File.Copy(configFn, fn);
 
                 this.YamlConnectorItems = new Dictionary<string, object>();
                 this.YamlConnectorItems.Add("configuration", name);
