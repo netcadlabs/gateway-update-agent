@@ -6,9 +6,9 @@
     <Version>0.4.1</Version>
 
     <!-- package tool derlenirken condition çalışmadığı için burasının Debug ederken commentlenmesi gerekiyor. -->
-    <!-- <RuntimeIdentifiers>linux-x64;linux-arm;linux-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>linux-x64;linux-arm;linux-arm64</RuntimeIdentifiers>
     <InstallService>true</InstallService>
-    <SelfContained>True</SelfContained> -->
+    <SelfContained>True</SelfContained>
 
   </PropertyGroup>
 
