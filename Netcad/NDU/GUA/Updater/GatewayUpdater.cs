@@ -28,7 +28,7 @@ namespace Netcad.NDU.GUA.Updater
         int _tick;
         void IUpdater.Tick(string gatewayToken)
         {
-            lock (tickLocker)
+            lock(tickLocker)
             {
                 logger.LogInformation($"Tick ... {++_tick}");
                 // if (_tick % 10 == 0)throw new Exception("test ex");
@@ -40,27 +40,33 @@ namespace Netcad.NDU.GUA.Updater
         private void checkUpdates()
         {
             string url = Helper.CombineUrl(settings.Hostname, suffix, settings.Token);
-            var webClient = new WebClient();
-            string bundlesArrayJson = webClient.DownloadString(url);
-
-            UpdateInfo[] updates = null;
-            try
+            using(var wcDownload = new WebClient())
             {
-                updates = Helper.DeserializeFromJsonText<UpdateInfo[]>(bundlesArrayJson);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error while parsing bundles! API response:{bundlesArrayJson}", ex);
-            }
+                string bundlesArrayJson = wcDownload.DownloadString(url);
 
-            ApiResult[] arr = this.installManager.CheckUpdates(updates).ToArray();
-            if (arr.Length > 0)
-            {
-                string json = JsonConvert.SerializeObject(arr);
-                string urlPost = Helper.CombineUrl(settings.Hostname, suffix, settings.Token, "result");
-                string res = webClient.UploadString(urlPost, json);
-            }
+                UpdateInfo[] updates = null;
+                try
+                {
+                    updates = Helper.DeserializeFromJsonText<UpdateInfo[]>(bundlesArrayJson);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Error while parsing bundles! API response:{bundlesArrayJson}", ex);
+                }
 
+                UpdateResult[] arr = this.installManager.CheckUpdates(updates).ToArray();
+                if (arr.Length > 0)
+                {
+                    string json = JsonConvert.SerializeObject(arr);
+
+                    using(var wcPost = new WebClient())
+                    {
+                        wcPost.Headers[HttpRequestHeader.ContentType] = "application/json";
+                        string urlPost = Helper.CombineUrl(settings.Hostname, suffix, settings.Token, "result");
+                        string res = wcPost.UploadString(urlPost, json);
+                    }
+                }
+            }
         }
 
     }

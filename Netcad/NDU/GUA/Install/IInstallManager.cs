@@ -5,6 +5,6 @@ using Netcad.NDU.GUA.Updater;
 namespace Netcad.NDU.GUA.Install
 {
     internal interface IInstallManager {
-        IEnumerable<ApiResult> CheckUpdates(IEnumerable<UpdateInfo> value);
+        IEnumerable<UpdateResult> CheckUpdates(IEnumerable<UpdateInfo> value);
     }
 }

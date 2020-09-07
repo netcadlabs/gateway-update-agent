@@ -6,7 +6,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 {
     internal interface IItem
     {
-        string ID { get; set; }
+        string UUID { get; set; }
         Category Category { get; }
         int Version { get; set; }
         string URL { get; set; }
@@ -14,7 +14,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         Dictionary<string, object> YamlConnectorItems { get; }
 
         void Save(string fileName);
-        void DownloadIfRequired(ISettings stt, ILogger logger);
-        void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger);
+        bool DownloadIfRequired(ISettings stt, ILogger logger);
+        bool UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger);
     }
 }

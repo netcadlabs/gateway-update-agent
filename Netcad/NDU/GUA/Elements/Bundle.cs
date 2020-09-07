@@ -77,7 +77,7 @@ namespace Netcad.NDU.GUA.Elements
         internal IEnumerable<GUAException> GetErrors()
         {
             if (this._errors != null)
-                lock (this._errors)
+                lock(this._errors)
                 {
                     return this._errors.ToArray();
                 }
@@ -90,7 +90,7 @@ namespace Netcad.NDU.GUA.Elements
             if (!this.items.ContainsKey(u.UUID))
             {
                 IItem item = createItem(u.Category);
-                item.ID = u.UUID;
+                item.UUID = u.UUID;
                 item.Version = u.Version;
                 item.URL = u.Url;
                 item.State = States.DownloadRequired;
@@ -147,34 +147,66 @@ namespace Netcad.NDU.GUA.Elements
             return res;
         }
 
-        internal void DownloadIfRequired(ISettings stt, ILogger logger)
+        internal IEnumerable<UpdateResult> DownloadIfRequired(ISettings stt, ILogger logger)
         {
+            List<UpdateResult> lst = new List<UpdateResult>();
             Parallel.ForEach(this.items.Values, (IItem item) =>
             {
                 try
                 {
-                    item.DownloadIfRequired(stt, logger);
+                    if (item.DownloadIfRequired(stt, logger))
+                        lst.Add(new UpdateResult()
+                        {
+                            Type = this.Type,
+                                UUID = item.UUID,
+                                State = UpdateResultState.Downloaded,
+                                InstallLog = $"State: {item.State}"
+                        });
                 }
                 catch (Exception ex)
                 {
-                    this.setError(this.Type, item.ID, ex);
+                    this.setError(this.Type, item.UUID, ex);
+                    lst.Add(new UpdateResult()
+                    {
+                        Type = this.Type,
+                            UUID = item.UUID,
+                            State = UpdateResultState.Error,
+                            InstallLog = $"Error.Message: {ex.Message}"
+                    });
                 }
             });
+            return lst;
         }
 
-        internal void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
+        internal IEnumerable<UpdateResult> UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
         {
+            List<UpdateResult> lst = new List<UpdateResult>();
             foreach (IItem item in this.items.Values)
             {
                 try
                 {
-                    item.UpdateIfRequired(ss, stt, logger);
+                    if (item.UpdateIfRequired(ss, stt, logger))
+                        lst.Add(new UpdateResult()
+                        {
+                            Type = this.Type,
+                                UUID = item.UUID,
+                                State = UpdateResultState.Installed,
+                                InstallLog = $"State: {item.State}"
+                        });
                 }
                 catch (Exception ex)
                 {
-                    this.setError(this.Type, item.ID, ex);
+                    this.setError(this.Type, item.UUID, ex);
+                    lst.Add(new UpdateResult()
+                    {
+                        Type = this.Type,
+                            UUID = item.UUID,
+                            State = UpdateResultState.Error,
+                            InstallLog = $"Error.Message: {ex.Message}"
+                    });
                 }
             }
+            return lst;
         }
 
         private IItem createItem(Category c)
@@ -224,7 +256,7 @@ namespace Netcad.NDU.GUA.Elements
         private const string itemJsonFileName = "item.json";
         private static string getItemFileName(string dir, IItem item)
         {
-            string subDir = Path.Combine(dir, Helper.ReplaceInvalidPathChars(item.ID, "_"));
+            string subDir = Path.Combine(dir, Helper.ReplaceInvalidPathChars(item.UUID, "_"));
             if (!Directory.Exists(subDir))
                 Directory.CreateDirectory(subDir);
             return Path.Combine(subDir, itemJsonFileName);
@@ -247,7 +279,7 @@ namespace Netcad.NDU.GUA.Elements
                     try
                     {
                         IItem item = Helper.DeserializeFromJsonFile<IItem>(fn);
-                        this.items.Add(item.ID, item);
+                        this.items.Add(item.UUID, item);
                     }
                     catch (Exception ex)
                     {

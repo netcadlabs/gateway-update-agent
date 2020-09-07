@@ -12,7 +12,7 @@ namespace Netcad.NDU.GUA.Elements.Items
     internal class Command : IItem
     {
         #region Model
-        public string ID { get; set; }
+        public string UUID { get; set; }
         public Category Category => Category.Command;
         public int Version { get; set; }
         public string URL { get; set; }
@@ -29,7 +29,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         #region IO
         private string _getIdForDir()
         {
-            return Helper.ReplaceInvalidPathChars(this.ID, "_");
+            return Helper.ReplaceInvalidPathChars(this.UUID, "_");
         }
         private string getExtractDir(ISettings stt)
         {
@@ -40,7 +40,7 @@ namespace Netcad.NDU.GUA.Elements.Items
             string dir = Path.Combine(stt.HistoryFolder, "_command_downloads", _getIdForDir());
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
-            string name = string.Concat("command_", Helper.ReplaceInvalidFileNameChars(this.ID, "_"), ".zip");
+            string name = string.Concat("command_", Helper.ReplaceInvalidFileNameChars(this.UUID, "_"), ".zip");
             return Path.Combine(dir, name);
         }
         private string getPreInstallShFileName(ISettings stt)
@@ -63,7 +63,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Download
 
-        public void DownloadIfRequired(ISettings stt, ILogger logger)
+        public bool DownloadIfRequired(ISettings stt, ILogger logger)
         {
             if (this.State == States.DownloadRequired)
             {
@@ -72,46 +72,51 @@ namespace Netcad.NDU.GUA.Elements.Items
                     File.Delete(fn);
 
                 logger.LogInformation($"Downloading Command...  Type:{this.URL}");
-                
-                var webClient = new WebClient();
-                webClient.DownloadFile(this.URL, fn);
+
+                using(var webClient = new WebClient())
+                    webClient.DownloadFile(this.URL, fn);
 
                 if (!File.Exists(fn))
                     throw new Exception($"Cannot download... url:{this.URL} target:{fn} ");
                 else
+                {
                     this.State = States.Downloaded;
+                    return true;
+                }
             }
+            return false;
         }
 
         #endregion
 
         #region Update
 
-        public void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
+        public bool UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
         {
             switch (this.State)
             {
                 case (States.Downloaded):
                     this.install(ss, stt);
-                    break;
+                    return true;
 
                 case (States.UninstallRequired):
                     this.uninstall(ss, stt);
-                    break;
+                    return true;
                 case (States.DeactivateRequired):
                     this.deactivate(ss, stt);
-                    break;
+                    return true;
 
                 case (States.ActivateRequired):
                     this.activate(ss, stt);
-                    break;
+                    return true;
                 case (States.DownloadRequired):
                     this.DownloadIfRequired(stt, logger);
                     this.State = States.Downloaded;
                     this.install(ss, stt);
-                    break;
+                    return true;
 
             }
+            return false;
         }
 
         private void install(ServiceState ss, ISettings stt)

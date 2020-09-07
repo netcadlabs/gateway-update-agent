@@ -44,10 +44,10 @@ namespace Netcad.NDU.GUA.Install
                 return Helper.CombineUrl(this.settings.Hostname, "/api/gus/downloads/", url);
             }
         }
-        public IEnumerable<ApiResult> CheckUpdates(IEnumerable<UpdateInfo> updates)
+        public IEnumerable<UpdateResult> CheckUpdates(IEnumerable<UpdateInfo> updates)
         {
             List<GUAException> errors = new List<GUAException>();
-            List<ApiResult> apiResults = new List<ApiResult>();
+            List<UpdateResult> results = new List<UpdateResult>();
             Dictionary<string, Bundle> bundles = loadBundles();
             try
             {
@@ -144,18 +144,18 @@ namespace Netcad.NDU.GUA.Install
                 foreach (var ex in errors)
                 {
                     logger.LogError(ex, "Error in CheckUpdates");
-                    apiResults.Add(
-                        new ApiResult
+                    results.Add(
+                        new UpdateResult
                         {
                             Type = ex.Type,
-                                ID = ex.UUID,
-                                State = ApiResultState.Error,
+                                UUID = ex.UUID,
+                                State = UpdateResultState.Error,
                                 InstallLog = ex.Message
                         }
                     );
                 }
             }
-            return apiResults;
+            return results;
         }
         private Dictionary<string, Bundle> loadBundles()
         {

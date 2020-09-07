@@ -12,7 +12,7 @@ namespace Netcad.NDU.GUA.Elements.Items
     internal class Config : IItem
     {
         #region Model
-        public string ID { get; set; }
+        public string UUID { get; set; }
         public Category Category => Category.Config;
         public int Version { get; set; }
         public string URL { get; set; }
@@ -49,7 +49,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         }
         private string getDownloadDir(ISettings stt)
         {
-            string dir = Path.Combine(stt.HistoryFolder, "_config_downloads", Helper.ReplaceInvalidPathChars(string.Concat(this.Type, "_", this.ID), "_"));
+            string dir = Path.Combine(stt.HistoryFolder, "_config_downloads", Helper.ReplaceInvalidPathChars(string.Concat(this.Type, "_", this.UUID), "_"));
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             return dir;
@@ -58,7 +58,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Download
 
-        public void DownloadIfRequired(ISettings stt, ILogger logger)
+        public bool DownloadIfRequired(ISettings stt, ILogger logger)
         {
             if (this.State == States.DownloadRequired)
             {
@@ -68,21 +68,25 @@ namespace Netcad.NDU.GUA.Elements.Items
 
                 logger.LogInformation($"Downloading Config...  Type:{this.URL}");
 
-                var webClient = new WebClient();
-                webClient.DownloadFile(this.URL, fn);
+                using(var webClient = new WebClient())
+                    webClient.DownloadFile(this.URL, fn);
 
                 if (!File.Exists(fn))
                     throw new Exception($"Cannot download... url:{this.URL} target:{fn} ");
                 else
+                {
                     this.State = States.Downloaded;
+                    return true;
+                }
             }
+            return false;
         }
 
         #endregion
 
         #region Update
 
-        public void UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
+        public bool UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
         {
             if (ss == ServiceState.Stopped)
             {
@@ -91,26 +95,27 @@ namespace Netcad.NDU.GUA.Elements.Items
                     case (States.Downloaded):
                         this.install(stt);
                         this.State = States.Installed;
-                        break;
+                        return true;
                     case (States.UninstallRequired):
                         this.uninstall(stt);
                         this.State = States.Uninstalled;
-                        break;
+                        return true;
                     case (States.DeactivateRequired):
                         this.deactivate(stt);
                         this.State = States.Deactivated;
-                        break;
+                        return true;
                     case (States.ActivateRequired):
                         this.activate(stt, logger);
                         this.State = States.Installed;
-                        break;
+                        return true;
                     case (States.DownloadRequired):
                         this.DownloadIfRequired(stt, logger);
                         this.install(stt);
                         this.State = States.Installed;
-                        break;
+                        return true;
                 }
             }
+            return false;
         }
 
         private void install(ISettings stt)
@@ -127,7 +132,7 @@ namespace Netcad.NDU.GUA.Elements.Items
                 string configFn = Path.Combine(extractDir, "config.json");
                 if (!File.Exists(configFn))
                     throw new Exception($"config.json file not exits in the zip file... url:{this.URL}");
-                
+
                 string name = _getNameForConfigFile();
                 string fn = getConfFileName(stt);
                 File.Copy(configFn, fn);
