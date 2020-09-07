@@ -13,7 +13,8 @@ namespace Netcad.NDU.GUA.Settings
 
         string HistoryFolder { get; }
         Version GUAVersion { get; }
-        //*****string TempFolder { get; }
+
+        void ListenChange(Action onChange);
 
         void ReloadIfRequired();
     }

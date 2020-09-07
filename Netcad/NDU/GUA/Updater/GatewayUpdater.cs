@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace Netcad.NDU.GUA.Updater
 {
-    public class GatewayUpdater : IUpdater
+    internal class GatewayUpdater : IUpdater
     {
         private readonly ILogger<GatewayUpdater> logger;
         private readonly ISettings settings;
@@ -23,20 +24,21 @@ namespace Netcad.NDU.GUA.Updater
             this.installManager = installManager;
         }
 
+        private static object tickLocker = new object();
         int _tick;
         void IUpdater.Tick(string gatewayToken)
         {
-            logger.LogInformation($"Tick ... {++_tick}");
-
-            // if (_tick % 10 == 0)throw new Exception("test ex");
-
-            checkUpdates();
+            lock (tickLocker)
+            {
+                logger.LogInformation($"Tick ... {++_tick}");
+                // if (_tick % 10 == 0)throw new Exception("test ex");
+                checkUpdates();
+            }
         }
 
         private const string suffix = "/api/gus/v1/gateway/";
         private void checkUpdates()
         {
-            settings.ReloadIfRequired();
             string url = Helper.CombineUrl(settings.Hostname, suffix, settings.Token);
             var webClient = new WebClient();
             string bundlesArrayJson = webClient.DownloadString(url);
@@ -50,7 +52,15 @@ namespace Netcad.NDU.GUA.Updater
             {
                 throw new Exception($"Error while parsing bundles! API response:{bundlesArrayJson}", ex);
             }
-            this.installManager.CheckUpdates(updates);
+
+            ApiResult[] arr = this.installManager.CheckUpdates(updates).ToArray();
+            if (arr.Length > 0)
+            {
+                string json = JsonConvert.SerializeObject(arr);
+                string urlPost = Helper.CombineUrl(settings.Hostname, suffix, settings.Token, "result");
+                string res = webClient.UploadString(urlPost, json);
+            }
+
         }
 
     }

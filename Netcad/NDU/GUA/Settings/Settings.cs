@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Utils;
@@ -7,7 +8,6 @@ namespace Netcad.NDU.GUA.Settings
 {
     public class Settings : ISettings
     {
-
         private config _config;
         public string Hostname { get { return _config.Hostname; } }
         public string Token { get { return _config.Token; } }
@@ -18,11 +18,21 @@ namespace Netcad.NDU.GUA.Settings
 
         public string HistoryFolder { get; private set; }
         public Version GUAVersion { get; private set; }
-       
+
         public readonly ILogger<Settings> _logger;
 
+        private List<Action> onChangeActions = new List<Action>();
+        public void ListenChange(Action onChange)
+        {
+            this.onChangeActions.Add(onChange);
+        }
         public Settings(ILogger<Settings> logger)
         {
+#if DEBUG
+            string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            fileName = Path.Combine(assemblyFolder, "GatewayUpdateAgent.conf");
+#endif
+
             this._logger = logger;
             this.load();
         }
@@ -45,20 +55,16 @@ namespace Netcad.NDU.GUA.Settings
             try
             {
                 this.GUAVersion = (Version)typeof(Settings).Assembly.GetName().Version;
-#if DEBUG
-                string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                fileName = Path.Combine(assemblyFolder, "GatewayUpdateAgent.conf");
-#endif
                 this._config = Helper.DeserializeFromJsonFile<config>(fileName);
                 if (string.IsNullOrWhiteSpace(this._config.Hostname))
-                throw new Exception($"No Hostname definden in {fileName}");
+                    throw new Exception($"No Hostname definden in {fileName}");
                 if (!string.IsNullOrWhiteSpace(this._config.Token) && !this._config.Hostname.EndsWith("/"))
                     this._config.Hostname += "/";
-                
 
 #if DEBUG
+string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 string testDir = @"/tmp/Netcad/NDU/GUA_test";
-                
+
                 if (_firstRun)
                 {
                     _firstRun = false;
@@ -69,6 +75,7 @@ namespace Netcad.NDU.GUA.Settings
                 this._config.YamlFileName = Path.Combine(testDir, @"tb_gateway.yaml");
                 this._config.ConfigFolder = Path.Combine(testDir, @"configs");
                 this._config.ExtensionFolder = Path.Combine(testDir, @"extensions");
+                // this._config.IntervalInMinutes = Math.Min(this._config.IntervalInMinutes, 0.5);
 #endif
                 if (!Directory.Exists(this.ExtensionFolder))
                     Directory.CreateDirectory(this.ExtensionFolder);

@@ -26,10 +26,7 @@ namespace Netcad.NDU.GUA
         {
             _logger.LogDebug($"AgentService is starting.");
 
-            stoppingToken.Register(() =>
-                _logger.LogDebug($"AgentService background task is stopping."));
-
-            int msec = (int)(Helper.ParseDouble(_settings.IntervalInMinutes, 30) * 60000d);
+            stoppingToken.Register(() => _logger.LogDebug($"AgentService background task is stopping."));
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -37,20 +34,24 @@ namespace Netcad.NDU.GUA
 
                 try
                 {
+                    _settings.ReloadIfRequired();
                     _updater.Tick("token_sample");
                 }
                 catch (Exception e)
                 {
-
                     _logger.LogError(e, "");
                     _logger.LogInformation($"Error Message: { e.Message}");
                 }
 
-                await Task.Delay(msec, stoppingToken);
+                await Task.Delay(getInterval(), stoppingToken);
             }
             _logger.LogDebug($"AgentService background task is stopping.");
         }
-
+        private int getInterval()
+        {
+            double interval = _settings.IntervalInMinutes;
+            return (int)(Helper.ParseDouble(interval, 30) * 60000d);
+        }
     }
 
 }

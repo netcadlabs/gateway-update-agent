@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace Netcad.NDU.GUA.Utils
@@ -41,35 +42,6 @@ namespace Netcad.NDU.GUA.Utils
                 yield return fn;
             }
         }
-        // private static IEnumerable<string> copyDir(string source, string destination)
-        // {
-        //     foreach (string dirPath in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
-        //         Directory.CreateDirectory(dirPath.Replace(source, destination));
-
-        //     foreach (string newPath in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
-        //     {
-        //         string fn = newPath.Replace(source, destination);
-        //         File.Copy(newPath, fn, true);
-        //         yield return fn;
-        //     }
-        // }
-
-        // public static void CopyDirectory(string source, string destination, bool cleanDestination)
-        // {
-        //     if (cleanDestination)
-        //         DeleteDirectory(destination);
-        //     if (!Directory.Exists(destination))
-        //         Directory.CreateDirectory(destination);
-        //     Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(source, destination, true);
-        // }
-        // public static void MoveDirectory(string source, string destination, bool cleanDestination)
-        // {
-        //     if (cleanDestination)
-        //         DeleteDirectory(destination);
-        //     if (!Directory.Exists(destination))
-        //         Directory.CreateDirectory(destination);
-        //     Microsoft.VisualBasic.FileIO.FileSystem.MoveDirectory(source, destination, true);
-        // }
         public static void DeleteDir(string dir)
         {
             if (System.IO.Directory.Exists(dir))
@@ -137,18 +109,71 @@ namespace Netcad.NDU.GUA.Utils
             return JsonConvert.DeserializeObject<T>(jsonText);
         }
 
-        public static string CombineUrl(params string[] items)
+        public static string CombineUrl(params string[] parts)
         {
-            if (items != null && items.Length > 0)
+            if (parts == null)
+                throw new ArgumentNullException(nameof(parts));
+
+            string result = "";
+            bool inQuery = false, inFragment = false;
+
+            string CombineEnsureSingleSeparator(string a, string b, char separator)
             {
-                Uri uri = new Uri(items[0]);
-                for (int i = 1; i < items.Length; i++)
-                {
-                    uri = new Uri(uri, items[i]);
-                }
-                return uri.ToString();
+                if (string.IsNullOrEmpty(a))return b;
+                if (string.IsNullOrEmpty(b))return a;
+                return a.TrimEnd(separator) + separator + b.TrimStart(separator);
             }
-            return string.Empty;
+
+            foreach (var part in parts)
+            {
+                if (string.IsNullOrEmpty(part))
+                    continue;
+
+                if (result.EndsWith("?") || part.StartsWith("?"))
+                    result = CombineEnsureSingleSeparator(result, part, '?');
+                else if (result.EndsWith("#") || part.StartsWith("#"))
+                    result = CombineEnsureSingleSeparator(result, part, '#');
+                else if (inFragment)
+                    result += part;
+                else if (inQuery)
+                    result = CombineEnsureSingleSeparator(result, part, '&');
+                else
+                    result = CombineEnsureSingleSeparator(result, part, '/');
+
+                if (part.Contains("#"))
+                {
+                    inQuery = false;
+                    inFragment = true;
+                }
+                else if (!inFragment && part.Contains("?"))
+                {
+                    inQuery = true;
+                }
+            }
+            return EncodeIllegalCharacters(result);
+        }
+        private static string EncodeIllegalCharacters(string s, bool encodeSpaceAsPlus = false)
+        {
+            if (string.IsNullOrEmpty(s))
+                return s;
+
+            if (encodeSpaceAsPlus)
+                s = s.Replace(" ", "+");
+
+            // Uri.EscapeUriString mostly does what we want - encodes illegal characters only - but it has a quirk
+            // in that % isn't illegal if it's the start of a %-encoded sequence https://stackoverflow.com/a/47636037/62600
+
+            // no % characters, so avoid the regex overhead
+            if (!s.Contains("%"))
+                return Uri.EscapeUriString(s);
+
+            // pick out all %-hex-hex matches and avoid double-encoding 
+            return Regex.Replace(s, "(.*?)((%[0-9A-Fa-f]{2})|$)", c =>
+            {
+                var a = c.Groups[1].Value; // group 1 is a sequence with no %-encoding - encode illegal characters
+                var b = c.Groups[2].Value; // group 2 is a valid 3-character %-encoded sequence - leave it alone!
+                return Uri.EscapeUriString(a) + b;
+            });
         }
 
     }

@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Elements;
 using Netcad.NDU.GUA.Settings;
+using Netcad.NDU.GUA.Updater;
 using Netcad.NDU.GUA.Utils;
+using Newtonsoft.Json;
 
 namespace Netcad.NDU.GUA.Install
 {
@@ -38,13 +40,14 @@ namespace Netcad.NDU.GUA.Install
                     throw new NotImplementedException();
             }
             else
-            {                
+            {
                 return Helper.CombineUrl(this.settings.Hostname, "/api/gus/downloads/", url);
             }
         }
-        public void CheckUpdates(IEnumerable<UpdateInfo> updates)
+        public IEnumerable<ApiResult> CheckUpdates(IEnumerable<UpdateInfo> updates)
         {
-            List<Exception> errors = new List<Exception>();
+            List<GUAException> errors = new List<GUAException>();
+            List<ApiResult> apiResults = new List<ApiResult>();
             Dictionary<string, Bundle> bundles = loadBundles();
             try
             {
@@ -54,13 +57,13 @@ namespace Netcad.NDU.GUA.Install
                 {
                     if (string.IsNullOrWhiteSpace(u.Url))
                     {
-                        errors.Add(new Exception($"Update item url is null. Type: {u.Type} ID: {u.UUID}"));
+                        errors.Add(new GUAException(u.Type, u.UUID, $"Update item url is null. Type: {u.Type} ID: {u.UUID}"));
                         continue;
                     }
                     u.Url = validateDownloadUrl(u.Url);
                     if (dicIdUpdates.ContainsKey(u.UUID))
                     {
-                        errors.Add(new Exception($"Update item has a duplicated ID. Type: {u.Type} ID: {u.UUID}"));
+                        errors.Add(new GUAException(u.Type, u.UUID, $"Update item has a duplicated ID. Type: {u.Type} ID: {u.UUID}"));
                         continue;
                     }
                     else
@@ -124,9 +127,13 @@ namespace Netcad.NDU.GUA.Install
 
                 }
             }
+            catch (GUAException ge)
+            {
+                errors.Add(ge);
+            }
             catch (Exception ex)
             {
-                errors.Add(ex);
+                errors.Add(new GUAException("generic", "generic", ex.Message));
             }
 
             foreach (Bundle b in bundles.Values)
@@ -134,15 +141,22 @@ namespace Netcad.NDU.GUA.Install
 
             if (errors.Count > 0)
             {
-                //**** call api
-
-                foreach (Exception ex in errors)
+                foreach (var ex in errors)
+                {
                     logger.LogError(ex, "Error in CheckUpdates");
-
+                    apiResults.Add(
+                        new ApiResult
+                        {
+                            Type = ex.Type,
+                                ID = ex.UUID,
+                                State = ApiResultState.Error,
+                                InstallLog = ex.Message
+                        }
+                    );
+                }
             }
-
+            return apiResults;
         }
-
         private Dictionary<string, Bundle> loadBundles()
         {
             Dictionary<string, Bundle> dic = new Dictionary<string, Bundle>(StringComparer.OrdinalIgnoreCase);

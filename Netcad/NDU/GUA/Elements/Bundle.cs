@@ -66,26 +66,22 @@ namespace Netcad.NDU.GUA.Elements
         }
 
         #region Errors
-        private Dictionary<string, List<Exception>> _errors = new Dictionary<string, List<Exception>>();
-        private void setError(string uuid, Exception ex)
+        private List<GUAException> _errors = new List<GUAException>();
+        private void setError(string type, string uuid, Exception ex)
         {
-            lock (this._errors)
+            lock(this._errors)
             {
-                List<Exception> lst;
-                if (!this._errors.TryGetValue(uuid, out lst))
-                {
-                    lst = new List<Exception>();
-                    this._errors.Add(uuid, lst);
-                }
-                lst.Add(ex);
+                _errors.Add(new GUAException(type, uuid, ex.Message));
             }
         }
-        internal IEnumerable<Exception> GetErrors()
+        internal IEnumerable<GUAException> GetErrors()
         {
             if (this._errors != null)
-                foreach (var lst in this._errors.Values)
-                    foreach (var ex in lst)
-                        yield return ex;
+                lock (this._errors)
+                {
+                    return this._errors.ToArray();
+                }
+            return new GUAException[0];
         }
         #endregion
 
@@ -161,7 +157,7 @@ namespace Netcad.NDU.GUA.Elements
                 }
                 catch (Exception ex)
                 {
-                    this.setError(item.ID, ex);
+                    this.setError(this.Type, item.ID, ex);
                 }
             });
         }
@@ -176,7 +172,7 @@ namespace Netcad.NDU.GUA.Elements
                 }
                 catch (Exception ex)
                 {
-                    this.setError(item.ID, ex);
+                    this.setError(this.Type, item.ID, ex);
                 }
             }
         }
@@ -255,7 +251,7 @@ namespace Netcad.NDU.GUA.Elements
                     }
                     catch (Exception ex)
                     {
-                        this.setError(subDir, ex);
+                        this.setError(this.Type, subDir, ex);
                     }
                 }
             }
