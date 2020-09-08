@@ -14,7 +14,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         Dictionary<string, object> YamlConnectorItems { get; }
 
         void Save(string fileName);
-        bool DownloadIfRequired(ISettings stt, ILogger logger);
-        bool UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger);
+        IEnumerable<UpdateResult> DownloadIfRequired(IModule parent, ISettings stt, ILogger logger);
+        IEnumerable<UpdateResult> UpdateIfRequired(IModule parent, ServiceState ss, ISettings stt, ILogger logger);
     }
 }

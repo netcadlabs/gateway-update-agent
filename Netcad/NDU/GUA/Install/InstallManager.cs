@@ -48,10 +48,10 @@ namespace Netcad.NDU.GUA.Install
         {
             List<GUAException> errors = new List<GUAException>();
             List<UpdateResult> results = new List<UpdateResult>();
-            Dictionary<string, Bundle> bundles = loadBundles();
+            Dictionary<string, IModule> modules = loadBundles();
             try
             {
-                HashSet<Bundle> dirty = new HashSet<Bundle>();
+                HashSet<IModule> dirty = new HashSet<IModule>();
                 Dictionary<string, UpdateInfo> dicIdUpdates = new Dictionary<string, UpdateInfo>();
                 foreach (UpdateInfo u in updates)
                 {
@@ -69,30 +69,30 @@ namespace Netcad.NDU.GUA.Install
                     else
                         dicIdUpdates.Add(u.UUID, u);
 
-                    Bundle b;
-                    if (!bundles.TryGetValue(u.Type, out b))
+                    IModule b;
+                    if (!modules.TryGetValue(u.Type, out b))
                     {
                         string dir = Path.Combine(this.bundlesFolder, u.Type);
-                        b = new Bundle();
+                        b = ModuleFactory.CreateModule();
                         b.Type = u.Type;
                         b.GUAVersion = this.guaVersion;
-                        bundles.Add(u.Type, b);
+                        modules.Add(u.Type, b);
                     }
                     if (b.IsUpdateRequired(u))
                         dirty.Add(b);
                 }
-                foreach (Bundle b in bundles.Values)
+                foreach (IModule b in modules.Values)
                     if (b.IsUninstallOrDeactivationRequired(dicIdUpdates))
                         dirty.Add(b);
 
                 if (dirty.Count > 0)
                 {
-                    Parallel.ForEach(dirty, (Bundle b) =>
+                    Parallel.ForEach(dirty, (IModule b) =>
                     {
                         b.DownloadIfRequired(this.settings, this.logger);
                     });
 
-                    foreach (Bundle b in dirty)
+                    foreach (IModule b in dirty)
                         b.UpdateIfRequired(ServiceState.BeforeStop, this.settings, this.logger);
 
                     try
@@ -101,11 +101,11 @@ namespace Netcad.NDU.GUA.Install
                         string status = ShellHelper.StopTbProcess();
                         logger.LogInformation($"Status: {status}");
 
-                        foreach (Bundle b in dirty)
+                        foreach (IModule b in dirty)
                             b.UpdateIfRequired(ServiceState.Stopped, this.settings, this.logger);
 
                         YamlManager yamlMan = new YamlManager(this.settings.YamlFileName, this.guaVersion, this.logger);
-                        yamlMan.UpdateConnectors(bundles.Values.ToArray());
+                        yamlMan.UpdateConnectors(modules.Values.ToArray());
                     }
                     finally
                     {
@@ -114,12 +114,12 @@ namespace Netcad.NDU.GUA.Install
                         logger.LogInformation($"Status: {status}");
                     }
 
-                    foreach (Bundle b in dirty)
-                        b.UpdateIfRequired(ServiceState.Started, this.settings, this.logger);
+                    foreach (IModule b in dirty)
+                        results.AddRange(b.UpdateIfRequired(ServiceState.Started, this.settings, this.logger));
 
                     if (!Directory.Exists(this.bundlesFolder))
                         Directory.CreateDirectory(this.bundlesFolder);
-                    foreach (Bundle b in dirty)
+                    foreach (IModule b in dirty)
                     {
                         string dir = Path.Combine(this.bundlesFolder, b.Type);
                         b.Save(dir, this.guaVersion);
@@ -136,7 +136,7 @@ namespace Netcad.NDU.GUA.Install
                 errors.Add(new GUAException("generic", "generic", ex.Message));
             }
 
-            foreach (Bundle b in bundles.Values)
+            foreach (IModule b in modules.Values)
                 errors.AddRange(b.GetErrors());
 
             if (errors.Count > 0)
@@ -157,14 +157,14 @@ namespace Netcad.NDU.GUA.Install
             }
             return results;
         }
-        private Dictionary<string, Bundle> loadBundles()
+        private Dictionary<string, IModule> loadBundles()
         {
-            Dictionary<string, Bundle> dic = new Dictionary<string, Bundle>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, IModule> dic = new Dictionary<string, IModule>(StringComparer.OrdinalIgnoreCase);
             if (Directory.Exists(this.bundlesFolder))
             {
                 foreach (string dir in Directory.EnumerateDirectories(this.bundlesFolder))
                 {
-                    Bundle b = Bundle.Load(dir);
+                    IModule b = ModuleFactory.Load(dir);
                     dic.Add(b.Type, b);
                 }
             }

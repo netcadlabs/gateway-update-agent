@@ -65,7 +65,7 @@ namespace Netcad.NDU.GUA.Install
         }
 
         private static object ioLocker = new object();
-        internal void UpdateConnectors(Bundle[] arr)
+        internal void UpdateConnectors(IModule[] arr)
         {
             lock(ioLocker)
             {
@@ -86,7 +86,7 @@ namespace Netcad.NDU.GUA.Install
                     if (connector.ContainsKey(Key_GUAVersion))
                         connectors.RemoveAt(i);
                 }
-                foreach (Bundle b in arr)
+                foreach (IModule b in arr)
                     if (b.HasInstalledItem)
                         connectors.Add(toConnector(b));
 
@@ -95,7 +95,7 @@ namespace Netcad.NDU.GUA.Install
             }
         }
 
-        private object toConnector(Bundle b)
+        private object toConnector(IModule b)
         {
             Dictionary<object, object> dic = new Dictionary<object, object>();
             dic.Add(Key_Name, $"{b.Type} Connector");

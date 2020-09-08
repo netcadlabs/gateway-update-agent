@@ -12,9 +12,9 @@ using Newtonsoft.Json;
 
 namespace Netcad.NDU.GUA.Elements
 {
-    internal class Bundle
+    internal class Module : IModule
     {
-        private bundleLite lite;
+        private moduleLite lite;
         private Dictionary<string, IItem> items;
         public string Type { get => this.lite.Type; set => this.lite.Type = value; }
         public string GUAVersion { get => this.lite.GUAVersion; set => this.lite.GUAVersion = value; }
@@ -59,9 +59,9 @@ namespace Netcad.NDU.GUA.Elements
             }
         }
 
-        public Bundle()
+        public Module()
         {
-            this.lite = new bundleLite();
+            this.lite = new moduleLite();
             this.items = new Dictionary<string, IItem>();
         }
 
@@ -74,7 +74,7 @@ namespace Netcad.NDU.GUA.Elements
                 _errors.Add(new GUAException(type, uuid, ex.Message));
             }
         }
-        internal IEnumerable<GUAException> GetErrors()
+        public IEnumerable<GUAException> GetErrors()
         {
             if (this._errors != null)
                 lock(this._errors)
@@ -85,7 +85,7 @@ namespace Netcad.NDU.GUA.Elements
         }
         #endregion
 
-        internal bool IsUpdateRequired(UpdateInfo u)
+        public bool IsUpdateRequired(UpdateInfo u)
         {
             if (!this.items.ContainsKey(u.UUID))
             {
@@ -122,7 +122,7 @@ namespace Netcad.NDU.GUA.Elements
                 return true;
             }
         }
-        internal bool IsUninstallOrDeactivationRequired(Dictionary<string, UpdateInfo> dicIdUpdates)
+        public bool IsUninstallOrDeactivationRequired(Dictionary<string, UpdateInfo> dicIdUpdates)
         {
             bool res = false;
             foreach (string id in this.items.Keys)
@@ -147,14 +147,14 @@ namespace Netcad.NDU.GUA.Elements
             return res;
         }
 
-        internal IEnumerable<UpdateResult> DownloadIfRequired(ISettings stt, ILogger logger)
+        public IEnumerable<UpdateResult> DownloadIfRequired(ISettings stt, ILogger logger)
         {
             List<UpdateResult> lst = new List<UpdateResult>();
             Parallel.ForEach(this.items.Values, (IItem item) =>
             {
                 try
                 {
-                    if (item.DownloadIfRequired(stt, logger))
+                    foreach(UpdateResult ur in item.DownloadIfRequired(this, stt, logger))
                         lst.Add(new UpdateResult()
                         {
                             Type = this.Type,
@@ -178,21 +178,14 @@ namespace Netcad.NDU.GUA.Elements
             return lst;
         }
 
-        internal IEnumerable<UpdateResult> UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
+        public IEnumerable<UpdateResult> UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
         {
             List<UpdateResult> lst = new List<UpdateResult>();
             foreach (IItem item in this.items.Values)
             {
                 try
                 {
-                    if (item.UpdateIfRequired(ss, stt, logger))
-                        lst.Add(new UpdateResult()
-                        {
-                            Type = this.Type,
-                                UUID = item.UUID,
-                                State = UpdateResultState.Installed,
-                                InstallLog = $"State: {item.State}"
-                        });
+                    lst.AddRange(item.UpdateIfRequired(this, ss, stt, logger));
                 }
                 catch (Exception ex)
                 {
@@ -230,7 +223,7 @@ namespace Netcad.NDU.GUA.Elements
         {
             return Path.Combine(dir, "bundle.json");
         }
-        internal void Save(string dir, string guaVersion)
+        public void Save(string dir, string guaVersion)
         {
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
@@ -241,13 +234,13 @@ namespace Netcad.NDU.GUA.Elements
 
             this.saveItems(dir);
         }
-        internal static Bundle Load(string dir)
+        internal static IModule Load(string dir)
         {
             string fn = getLiteFn(dir);
             if (!File.Exists(fn))
                 throw new Exception($"File cannot be found: {fn}");
-            bundleLite bl = Helper.DeserializeFromJsonFile<bundleLite>(fn);
-            Bundle b = new Bundle();
+            moduleLite bl = Helper.DeserializeFromJsonFile<moduleLite>(fn);
+            Module b = new Module();
             b.lite = bl;
             b.loadItems(dir);
             return b;
@@ -290,7 +283,7 @@ namespace Netcad.NDU.GUA.Elements
         }
         #endregion
 
-        private class bundleLite
+        private class moduleLite
         {
             public string Type { get; set; }
             public string GUAVersion { get; set; }

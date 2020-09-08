@@ -58,7 +58,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Download
 
-        public bool DownloadIfRequired(ISettings stt, ILogger logger)
+        public IEnumerable<UpdateResult> DownloadIfRequired(IModule parent, ISettings stt, ILogger logger)
         {
             if (this.State == States.DownloadRequired)
             {
@@ -69,24 +69,29 @@ namespace Netcad.NDU.GUA.Elements.Items
                 logger.LogInformation($"Downloading Config...  Type:{this.URL}");
 
                 using(var webClient = new WebClient())
-                    webClient.DownloadFile(this.URL, fn);
+                webClient.DownloadFile(this.URL, fn);
 
                 if (!File.Exists(fn))
                     throw new Exception($"Cannot download... url:{this.URL} target:{fn} ");
                 else
                 {
                     this.State = States.Downloaded;
-                    return true;
+                    yield return new UpdateResult()
+                    {
+                        Type = parent.Type,
+                            UUID = this.UUID,
+                            State = UpdateResultState.Downloaded,
+                            InstallLog = $"State: {this.State}"
+                    };
                 }
             }
-            return false;
         }
 
         #endregion
 
         #region Update
 
-        public bool UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
+        public IEnumerable<UpdateResult> UpdateIfRequired(IModule parent, ServiceState ss, ISettings stt, ILogger logger)
         {
             if (ss == ServiceState.Stopped)
             {
@@ -95,27 +100,61 @@ namespace Netcad.NDU.GUA.Elements.Items
                     case (States.Downloaded):
                         this.install(stt);
                         this.State = States.Installed;
-                        return true;
+                        yield return new UpdateResult()
+                        {
+                            Type = parent.Type,
+                                UUID = this.UUID,
+                                State = UpdateResultState.Installed,
+                                InstallLog = $"State: {this.State}"
+                        };
+                        break;
                     case (States.UninstallRequired):
                         this.uninstall(stt);
                         this.State = States.Uninstalled;
-                        return true;
+                        yield return new UpdateResult()
+                        {
+                            Type = parent.Type,
+                                UUID = this.UUID,
+                                State = UpdateResultState.Uninstalled,
+                                InstallLog = $"State: {this.State}"
+                        };
+                        break;
                     case (States.DeactivateRequired):
                         this.deactivate(stt);
                         this.State = States.Deactivated;
-                        return true;
+                        yield return new UpdateResult()
+                        {
+                            Type = parent.Type,
+                                UUID = this.UUID,
+                                State = UpdateResultState.Uninstalled,
+                                InstallLog = $"State: {this.State}"
+                        };
+                        break;
                     case (States.ActivateRequired):
-                        this.activate(stt, logger);
+                        this.activate(parent, stt, logger);
                         this.State = States.Installed;
-                        return true;
+                        yield return new UpdateResult()
+                        {
+                            Type = parent.Type,
+                                UUID = this.UUID,
+                                State = UpdateResultState.Installed,
+                                InstallLog = $"State: {this.State}"
+                        };
+                        break;
                     case (States.DownloadRequired):
-                        this.DownloadIfRequired(stt, logger);
+                        this.DownloadIfRequired(parent, stt, logger);
                         this.install(stt);
                         this.State = States.Installed;
-                        return true;
+                        yield return new UpdateResult()
+                        {
+                            Type = parent.Type,
+                                UUID = this.UUID,
+                                State = UpdateResultState.Installed,
+                                InstallLog = $"State: {this.State}"
+                        };
+                        break;
                 }
             }
-            return false;
         }
 
         private void install(ISettings stt)
@@ -154,13 +193,13 @@ namespace Netcad.NDU.GUA.Elements.Items
             if (File.Exists(fn))
                 File.Delete(fn);
         }
-        private void activate(ISettings stt, ILogger logger)
+        private void activate(IModule parent, ISettings stt, ILogger logger)
         {
             string fn = getDownloadFileName(stt);
             if (!File.Exists(fn))
             {
                 this.State = States.DownloadRequired;
-                this.DownloadIfRequired(stt, logger);
+                this.DownloadIfRequired(parent, stt, logger);
                 this.install(stt);
             }
             else

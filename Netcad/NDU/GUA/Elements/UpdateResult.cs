@@ -26,7 +26,8 @@ namespace Netcad.NDU.GUA.Elements
     {
         Downloaded = 0,
         Installed = 1,
-        Error = 2
+        Error = 2,
+        Uninstalled = 3
     }
 
 }

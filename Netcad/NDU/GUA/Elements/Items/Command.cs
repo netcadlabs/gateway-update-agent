@@ -6,6 +6,7 @@ using System.Net;
 using Microsoft.Extensions.Logging;
 using Netcad.NDU.GUA.Settings;
 using Netcad.NDU.GUA.Utils;
+using Newtonsoft.Json;
 
 namespace Netcad.NDU.GUA.Elements.Items
 {
@@ -63,7 +64,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
         #region Download
 
-        public bool DownloadIfRequired(ISettings stt, ILogger logger)
+        public IEnumerable<UpdateResult> DownloadIfRequired(IModule parent, ISettings stt, ILogger logger)
         {
             if (this.State == States.DownloadRequired)
             {
@@ -74,49 +75,106 @@ namespace Netcad.NDU.GUA.Elements.Items
                 logger.LogInformation($"Downloading Command...  Type:{this.URL}");
 
                 using(var webClient = new WebClient())
-                    webClient.DownloadFile(this.URL, fn);
+                webClient.DownloadFile(this.URL, fn);
 
                 if (!File.Exists(fn))
                     throw new Exception($"Cannot download... url:{this.URL} target:{fn} ");
                 else
                 {
                     this.State = States.Downloaded;
-                    return true;
+                    yield return new UpdateResult()
+                    {
+                        Type = parent.Type,
+                            UUID = this.UUID,
+                            State = UpdateResultState.Downloaded,
+                            InstallLog = $"State: {this.State}"
+                    };
                 }
             }
-            return false;
         }
 
         #endregion
 
         #region Update
 
-        public bool UpdateIfRequired(ServiceState ss, ISettings stt, ILogger logger)
+        public IEnumerable<UpdateResult> UpdateIfRequired(IModule parent, ServiceState ss, ISettings stt, ILogger logger)
         {
             switch (this.State)
             {
                 case (States.Downloaded):
                     this.install(ss, stt);
-                    return true;
+                    yield return new UpdateResult()
+                    {
+                        Type = parent.Type,
+                            UUID = this.UUID,
+                            State = UpdateResultState.Installed,
+                            InstallLog = commandUpdateResultLog.CreateJson(ss, this.State)
+                    };
+                    break;
 
                 case (States.UninstallRequired):
                     this.uninstall(ss, stt);
-                    return true;
+                    yield return new UpdateResult()
+                    {
+                        Type = parent.Type,
+                            UUID = this.UUID,
+                            State = UpdateResultState.Uninstalled,
+                            InstallLog = commandUpdateResultLog.CreateJson(ss, this.State)
+                    };
+                    break;
                 case (States.DeactivateRequired):
                     this.deactivate(ss, stt);
-                    return true;
+                    yield return new UpdateResult()
+                    {
+                        Type = parent.Type,
+                            UUID = this.UUID,
+                            State = UpdateResultState.Uninstalled,
+                            InstallLog = commandUpdateResultLog.CreateJson(ss, this.State)
+                    };
+                    break;
 
                 case (States.ActivateRequired):
                     this.activate(ss, stt);
-                    return true;
+                    yield return new UpdateResult()
+                    {
+                        Type = parent.Type,
+                            UUID = this.UUID,
+                            State = UpdateResultState.Installed,
+                            InstallLog = commandUpdateResultLog.CreateJson(ss, this.State)
+                    };
+                    break;
                 case (States.DownloadRequired):
-                    this.DownloadIfRequired(stt, logger);
+                    this.DownloadIfRequired(parent, stt, logger);
                     this.State = States.Downloaded;
                     this.install(ss, stt);
-                    return true;
+                    yield return new UpdateResult()
+                    {
+                        Type = parent.Type,
+                            UUID = this.UUID,
+                            State = UpdateResultState.Installed,
+                            InstallLog = commandUpdateResultLog.CreateJson(ss, this.State)
+                    };
+                    break;
 
             }
-            return false;
+        }
+        private class commandUpdateResultLog
+        {
+            [JsonProperty("tbservice_state")]
+            public string ServiceState { get; set; }
+
+            [JsonProperty("item_state")]
+            public string ItemState { get; set; }
+
+            public static string CreateJson(ServiceState ss, States itemState)
+            {
+                return JsonConvert.SerializeObject(
+                    new commandUpdateResultLog()
+                    {
+                        ServiceState = ss.ToString(),
+                            ItemState = itemState.ToString()
+                    });
+            }
         }
 
         private void install(ServiceState ss, ISettings stt)
