@@ -20,6 +20,15 @@ namespace Netcad.NDU.GUA.Elements.Items
         public States State { get; set; }
         public Dictionary<string, object> YamlConnectorItems { get; set; }
 
+        //**NDU-310
+        public string config_type { get; set; }
+        public CustomConfigType custom_config_type { get; set; }
+        public Command(string ct, CustomConfigType cct)
+        {
+            this.config_type = ct;
+            this.custom_config_type = cct;
+        }
+
         public void Save(string fileName)
         {
             Helper.SerializeToJsonFile(this, fileName);
@@ -34,7 +43,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         }
         private string getExtractDir(ISettings stt)
         {
-            return Path.Combine(stt.ExtensionFolder, string.Concat("Comm_", _getIdForDir()));
+            return Path.Combine(stt.GetExtensionFolder(this.config_type, this.custom_config_type), string.Concat("Comm_", _getIdForDir()));
         }
         private string getZipFileName(ISettings stt)
         {

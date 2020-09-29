@@ -19,5 +19,12 @@ namespace Netcad.NDU.GUA.Elements
         IEnumerable<UpdateResult> DownloadIfRequired(ISettings stt, ILogger logger);
         bool IsUninstallOrDeactivationRequired(Dictionary<string, UpdateInfo> dicIdUpdates);
         bool IsUpdateRequired(UpdateInfo u);
+
+        //**NDU-310
+        string ConfigType { get; set; }
+        CustomConfigType CustomConfigType { get; set; }
+
+        string GetYamlFileName(ISettings stt);
+        string GetYamlCollectionName(ISettings stt);
     }
 }

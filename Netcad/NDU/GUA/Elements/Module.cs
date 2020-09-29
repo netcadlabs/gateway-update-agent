@@ -18,6 +18,24 @@ namespace Netcad.NDU.GUA.Elements
         private Dictionary<string, IItem> items;
         public string Type { get => this.lite.Type; set => this.lite.Type = value; }
         public string GUAVersion { get => this.lite.GUAVersion; set => this.lite.GUAVersion = value; }
+
+        public string ConfigType { get => this.lite.ConfigType; set => this.lite.ConfigType = value; }
+        public CustomConfigType CustomConfigType { get => this.lite.CustomConfigType; set => this.lite.CustomConfigType = value; }
+        public string GetYamlFileName(ISettings settings)
+        {
+            if (this.CustomConfigType != null)
+                return this.CustomConfigType.YamlFileName;
+            else
+                return settings.GetYamlFileName(this.ConfigType, this.CustomConfigType);
+        }
+        public string GetYamlCollectionName(ISettings settings)
+        {
+            if (this.CustomConfigType != null)
+                return this.CustomConfigType.YamlCollectionName;
+            else
+                return settings.GetYamlCollectionName(this.ConfigType, this.CustomConfigType);
+        }
+
         public Dictionary<string, object> GetYamlCustomProperties()
         {
             Dictionary<string, object> dic = new Dictionary<string, object>();
@@ -89,7 +107,7 @@ namespace Netcad.NDU.GUA.Elements
         {
             if (!this.items.ContainsKey(u.UUID))
             {
-                IItem item = createItem(u.Category);
+                IItem item = createItem(u.Category, u.config_type, u.custom_config_type);
                 item.UUID = u.UUID;
                 item.Version = u.Version;
                 item.URL = u.Url;
@@ -154,7 +172,7 @@ namespace Netcad.NDU.GUA.Elements
             {
                 try
                 {
-                    foreach(UpdateResult ur in item.DownloadIfRequired(this, stt, logger))
+                    foreach (UpdateResult ur in item.DownloadIfRequired(this, stt, logger))
                         lst.Add(new UpdateResult()
                         {
                             Type = this.Type,
@@ -202,16 +220,16 @@ namespace Netcad.NDU.GUA.Elements
             return lst;
         }
 
-        private IItem createItem(Category c)
+        private IItem createItem(Category c, string ct, CustomConfigType cct)
         {
             switch (c)
             {
                 case Category.Config:
-                    return new Config(this.Type);
+                    return new Config(this.Type, ct, cct);
                 case Category.Package:
-                    return new Package();
+                    return new Package(ct, cct);
                 case Category.Command:
-                    return new Command();
+                    return new Command(ct, cct);
                 default:
                     throw new NotImplementedException();
             }
@@ -287,6 +305,9 @@ namespace Netcad.NDU.GUA.Elements
         {
             public string Type { get; set; }
             public string GUAVersion { get; set; }
+
+            public string ConfigType { get; set; }
+            public CustomConfigType CustomConfigType { get; internal set; }
         }
     }
 }

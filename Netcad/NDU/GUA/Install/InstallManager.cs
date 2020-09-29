@@ -48,7 +48,7 @@ namespace Netcad.NDU.GUA.Install
         {
             List<GUAException> errors = new List<GUAException>();
             List<UpdateResult> results = new List<UpdateResult>();
-            Dictionary<string, IModule> modules = loadBundles();
+            Dictionary<string, IModule> modules = loadModules();
             try
             {
                 HashSet<IModule> dirty = new HashSet<IModule>();
@@ -76,6 +76,8 @@ namespace Netcad.NDU.GUA.Install
                         b = ModuleFactory.CreateModule();
                         b.Type = u.Type;
                         b.GUAVersion = this.guaVersion;
+                        b.ConfigType = u.config_type;
+                        b.CustomConfigType = u.custom_config_type;
                         modules.Add(u.Type, b);
                     }
                     if (b.IsUpdateRequired(u))
@@ -95,23 +97,33 @@ namespace Netcad.NDU.GUA.Install
                     foreach (IModule b in dirty)
                         b.UpdateIfRequired(ServiceState.BeforeStop, this.settings, this.logger);
 
+                    HashSet<string> services = new HashSet<string>();
                     try
                     {
                         logger.LogInformation("Stopping thingsboard-gateway.service!");
-                        string status = ShellHelper.StopTbProcess();
-                        logger.LogInformation($"Status: {status}");
+
+                        foreach (IModule b in dirty)
+                            foreach (string serviceName in settings.GetRestartServices(b.ConfigType, b.CustomConfigType))
+                                if (services.Add(serviceName))
+                                {
+                                    string status = ShellHelper.StopService(serviceName);
+                                    logger.LogInformation($"Status: {status}");
+                                }
 
                         foreach (IModule b in dirty)
                             b.UpdateIfRequired(ServiceState.Stopped, this.settings, this.logger);
 
-                        YamlManager yamlMan = new YamlManager(this.settings.YamlFileName, this.guaVersion, this.logger);
+                        YamlManager yamlMan = new YamlManager(this.guaVersion, this.logger, this.settings);
                         yamlMan.UpdateConnectors(modules.Values.ToArray());
                     }
                     finally
                     {
                         logger.LogInformation("Starting thingsboard-gateway.service...");
-                        string status = ShellHelper.StartTbProcess();
-                        logger.LogInformation($"Status: {status}");
+                        foreach (string serviceName in services)
+                        {
+                            string status = ShellHelper.StartService(serviceName);
+                            logger.LogInformation($"Status: {status}");
+                        }
                     }
 
                     foreach (IModule b in dirty)
@@ -157,7 +169,7 @@ namespace Netcad.NDU.GUA.Install
             }
             return results;
         }
-        private Dictionary<string, IModule> loadBundles()
+        private Dictionary<string, IModule> loadModules()
         {
             Dictionary<string, IModule> dic = new Dictionary<string, IModule>(StringComparer.OrdinalIgnoreCase);
             if (Directory.Exists(this.bundlesFolder))

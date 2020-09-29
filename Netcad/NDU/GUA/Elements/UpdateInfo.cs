@@ -1,3 +1,5 @@
+using Netcad.NDU.GUA.Settings;
+
 namespace Netcad.NDU.GUA.Elements
 {
     public class UpdateInfo
@@ -7,6 +9,9 @@ namespace Netcad.NDU.GUA.Elements
         public string Url { get; set; }
         public Category Category { get; set; }
         public int Version { get; set; }
-        
-    }
+
+        //**NDU-310
+        public string config_type { get; set; }
+        public CustomConfigType custom_config_type { get; set; }
+    }    
 }

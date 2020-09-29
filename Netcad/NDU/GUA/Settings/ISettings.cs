@@ -4,17 +4,17 @@ namespace Netcad.NDU.GUA.Settings
 {
     public interface ISettings
     {
-        public const string DEFAULT_APPTYPE = "default";
+        public const string DEFAULT_CONFIG_TYPE = "default";
 
         string Hostname { get; }
         string Token { get; }
         double IntervalInMinutes { get; }
-        
-        public string GetExtensionFolder(string appType = DEFAULT_APPTYPE);
-        public string GetConfigFolder(string appType = DEFAULT_APPTYPE);
-        public string GetYamlCollectionName(string appType = DEFAULT_APPTYPE);
-        public string GetYamlFileName(string appType = DEFAULT_APPTYPE);
-        public string[] GetRestartServices(string appType = DEFAULT_APPTYPE);
+
+        string GetExtensionFolder(string configType, CustomConfigType custom_config_type);
+        string GetConfigFolder(string configType, CustomConfigType custom_config_type);
+        string GetYamlCollectionName(string configType, CustomConfigType custom_config_type);
+        string GetYamlFileName(string configType, CustomConfigType custom_config_type);
+        string[] GetRestartServices(string configType, CustomConfigType custom_config_type);
 
         string HistoryFolder { get; }
         Version GUAVersion { get; }
