@@ -30,11 +30,28 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
 
 ```json
 {
-  "Hostname" : "https://nduupdateserver.netcad.com",
+  "Hostname" : "https://gateway.netcad.com",
+  "Token": "bG4IO6ICHIOl1obCB2Mu",
   "IntervalInMinutes": 30,
-  "ExtensionFolder" : "/var/lib/thingsboard_gateway/extensions/",
-  "ConfigFolder" : "/etc/thingsboard-gateway/config",
-  "YamlFileName" : "/etc/thingsboard-gateway/config/tb_gateway.yaml"
+      
+  "ConfigTypes": [
+      {
+          "ConfigType" :"default",
+          "ExtensionFolder" : "/var/lib/thingsboard_gateway/extensions/",
+          "ConfigFolder" : "/etc/thingsboard-gateway/config" ,
+          "YamlCollectionName" : "connectors",
+          "YamlFileName" : "/etc/thingsboard-gateway/config/tb_gateway.yaml",          
+          "RestartServices" : [ "thingsboard-gateway.service"]          
+      },    
+      {
+          "ConfigType" :"ndu_gate",
+          "ExtensionFolder" : "/var/lib/ndu_gate/runners/",
+          "ConfigFolder" : "/etc/ndu-gate/config" ,
+          "YamlCollectionName" : "runners",
+          "YamlFileName" : "/etc/ndu-gate/config/ndu_gate.yaml",          
+          "RestartServices" : [ "thingsboard-gateway.service", "ndu-gate.service"]
+      }
+  ]
 }
 ```
 
@@ -56,6 +73,15 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
         "url": "https://.../config.json",
         "category": "CONFIG",
         "version": 23,
+        
+        "custom_config_type":
+        {
+          "ExtensionFolder" : "/<custom>/",
+          "ConfigFolder" : "/<custom>/config" ,
+          "YamlCollectionName" : "<custom>",
+          "YamlFileName" : "/<custom>/<custom>.yaml",          
+          "RestartServices" : [ "<custom service 1>", "<custom service 2>"]
+        }
     },
     {
         "type": "sigara",
@@ -63,6 +89,8 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
         "url": "https://.../sigara-framework.zip",
         "category": "PACKAGE",
         "version": 5,
+        
+        "config_type" : "ndu_gate"
     },
     {
         "type": "sigara",
