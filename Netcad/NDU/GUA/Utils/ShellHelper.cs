@@ -15,7 +15,14 @@ namespace Netcad.NDU.GUA.Utils
 #endif            
             //RunCommand("sudo systemctl stop thingsboard-gateway.service");
             RunCommand($"sudo systemctl stop {serviceName}");
-            return RunCommand($"sudo systemctl status {serviceName}");
+            try
+            {
+                return RunCommand($"sudo systemctl status {serviceName}");
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
         public static string StartService(string serviceName)
         {
@@ -23,7 +30,14 @@ namespace Netcad.NDU.GUA.Utils
             return "";
 #endif
             RunCommand($"sudo systemctl start {serviceName}");
-            return RunCommand($"sudo systemctl status {serviceName}");
+            try
+            {
+                return RunCommand($"sudo systemctl status {serviceName}");
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
         public static string RunCommand(string cmd)
         {
