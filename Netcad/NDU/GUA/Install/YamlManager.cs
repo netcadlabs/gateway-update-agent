@@ -30,6 +30,9 @@ namespace Netcad.NDU.GUA.Install
 
         private static Dictionary<string, object> _parseYaml(string fn)
         {
+            if (!File.Exists(fn))
+                return new Dictionary<string, object>(); //**NDU-317
+
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(new CamelCaseNamingConvention())
                 .Build();
@@ -99,6 +102,12 @@ namespace Netcad.NDU.GUA.Install
                                     connectors.Add(toConnector(b));
 
                         var serializer = new SerializerBuilder().Build();
+                        if (!File.Exists(fn)) //**NDU-317
+                        {
+                            string dir = Path.GetDirectoryName(fn);
+                            if (!Directory.Exists(dir))
+                                Directory.CreateDirectory(dir);
+                        }
                         File.WriteAllText(fn, serializer.Serialize(yaml));
                     }
                 }

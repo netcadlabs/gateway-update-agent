@@ -22,7 +22,7 @@ namespace Netcad.NDU.GUA.Settings
             public string ConfigFolder { get; set; }
             public string YamlCollectionName { get; set; }
             public string YamlFileName { get; set; }
-            public string[] RestartServices { get; set; } 
+            public string[] RestartServices { get; set; }
         }
 
         private config _config;
@@ -143,9 +143,21 @@ namespace Netcad.NDU.GUA.Settings
                     Helper.CopyDir(sourceDir, testDir, true);
                 }
 
-                this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].YamlFileName = Path.Combine(testDir, @"tb_gateway.yaml");
-                this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].ConfigFolder = Path.Combine(testDir, @"configs");
-                this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].ExtensionFolder = Path.Combine(testDir, @"extensions");
+                // this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].YamlFileName = Path.Combine(testDir, @"tb_gateway.yaml");
+                // this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].ConfigFolder = Path.Combine(testDir, @"configs");
+                // this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].ExtensionFolder = Path.Combine(testDir, @"extensions");
+
+                //**NDU-317
+                foreach (configType cf in this._confTypes.Values)
+                {
+                    cf.YamlFileName = testDir + cf.YamlFileName;
+                    cf.ConfigFolder = testDir + cf.ConfigFolder;
+                    cf.ExtensionFolder = testDir + cf.ExtensionFolder;
+                }
+                this._config.Hostname = "http://80.253.246.57:8083/";
+                this._config.Token = "28rCtj9NOH94vxyan5MX";
+                
+
                 // this._config.IntervalInMinutes = Math.Min(this._config.IntervalInMinutes, 0.5);
 #endif
                 string extDir = this.GetExtensionFolder(ISettings.DEFAULT_CONFIG_TYPE, null);

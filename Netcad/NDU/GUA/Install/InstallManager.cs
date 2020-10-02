@@ -100,12 +100,11 @@ namespace Netcad.NDU.GUA.Install
                     HashSet<string> services = new HashSet<string>();
                     try
                     {
-                        logger.LogInformation("Stopping thingsboard-gateway.service!");
-
                         foreach (IModule b in dirty)
                             foreach (string serviceName in settings.GetRestartServices(b.ConfigType, b.CustomConfigType))
                                 if (services.Add(serviceName))
                                 {
+                                    logger.LogInformation($"Stopping {serviceName}!");
                                     string status = ShellHelper.StopService(serviceName);
                                     logger.LogInformation($"Status: {status}");
                                 }
@@ -118,9 +117,9 @@ namespace Netcad.NDU.GUA.Install
                     }
                     finally
                     {
-                        logger.LogInformation("Starting thingsboard-gateway.service...");
                         foreach (string serviceName in services)
                         {
+                            logger.LogInformation($"Starting {serviceName}...");
                             string status = ShellHelper.StartService(serviceName);
                             logger.LogInformation($"Status: {status}");
                         }

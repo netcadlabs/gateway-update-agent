@@ -13,7 +13,6 @@ namespace Netcad.NDU.GUA.Utils
 #if DEBUG
             return "";
 #endif            
-            //RunCommand("sudo systemctl stop thingsboard-gateway.service");
             RunCommand($"sudo systemctl stop {serviceName}");
             try
             {
