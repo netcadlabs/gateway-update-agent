@@ -50,7 +50,28 @@ namespace Netcad.NDU.GUA.Elements
                                 dic.Add(key, d[key]);
                             else
                             {
-                                if (d[key] != dic[key])
+                                bool err = false;
+                                object o1 = d[key];
+                                object o2 = dic[key];
+                                if (o1 != o2)
+                                {
+                                    if (o1 is string && o2 is string)
+                                    {
+                                        if (!string.Equals(o1, o2))
+                                            err = true;
+                                    }
+                                    else if (o1 is List<string> && o2 is List<string>)
+                                    {
+                                        List<string> lst = (List<string>)o1;
+                                        foreach (string v2 in (List<string>)o2)
+                                            if (!lst.Contains(v2))
+                                                lst.Add(v2);
+                                        dic[key] = lst;
+                                    }
+                                    else
+                                        err = true;
+                                }
+                                if (err)
                                     throw new Exception($"There is a conflict in the info.json connector_config values. Type: {this.Type} key: {key} value1: {dic[key]} value2: {d[key]}");
                             }
                         }

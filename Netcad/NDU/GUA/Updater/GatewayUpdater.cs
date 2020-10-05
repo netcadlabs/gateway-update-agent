@@ -48,6 +48,13 @@ namespace Netcad.NDU.GUA.Updater
                 try
                 {
                     updates = Helper.DeserializeFromJsonText<UpdateInfo[]>(bundlesArrayJson);
+
+                    // //**test
+                    // var lst = updates.ToList();
+                    // lst.Add(updates[0].Clone());
+                    // var u = lst.Last();
+                    // u.UUID = "aaa";
+                    // updates = lst.ToArray();
                 }
                 catch (Exception ex)
                 {

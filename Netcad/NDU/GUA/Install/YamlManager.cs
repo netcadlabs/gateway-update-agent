@@ -83,11 +83,11 @@ namespace Netcad.NDU.GUA.Install
                         string yamlCollectionName = m.GetYamlCollectionName(this.settings);
                         foreach (string key in yaml.Keys)
                             if (yamlCollectionName.Equals(key as string, StringComparison.OrdinalIgnoreCase))
-                                connectors = (List<object>)yaml[key];
+                                connectors = yaml[key] as List<object>;
                         if (connectors == null)
                         {
                             connectors = new List<object>();
-                            yaml.Add(yamlCollectionName, connectors);
+                            yaml[yamlCollectionName] = connectors;
                         }
 
                         for (int i = connectors.Count - 1; i >= 0; i--)

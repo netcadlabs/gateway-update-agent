@@ -181,6 +181,21 @@ namespace Netcad.NDU.GUA.Elements.Items
                 string extractDir = getExtractDir(stt);
                 PackInfoJson info = _extract(zipFn, extractDir);
                 this.YamlConnectorItems = info.connector_config;
+
+                //**NDU-317 - 2
+                if (this.YamlConnectorItems == null)
+                    this.YamlConnectorItems = new Dictionary<string, object>();
+                const string keyUuids = "uuids";
+                List<string> lstUuid = null;
+                if (this.YamlConnectorItems.ContainsKey(keyUuids))
+                    lstUuid = this.YamlConnectorItems[keyUuids] as List<string>;
+                if (lstUuid == null)
+                    lstUuid = new List<string>();
+                if (!lstUuid.Contains(this.UUID))
+                    lstUuid.Add(this.UUID);
+                this.YamlConnectorItems[keyUuids] = lstUuid;
+                //**
+
                 if (info.copy != null)
                 {
                     foreach (CopyInfo ci in info.copy)

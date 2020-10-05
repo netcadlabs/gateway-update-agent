@@ -136,7 +136,8 @@ namespace Netcad.NDU.GUA.Settings
                 string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 string testDir = @"/tmp/Netcad/NDU/GUA_test";
 
-                if (_firstRun)
+                bool initialize = true;
+                if (_firstRun && initialize)
                 {
                     _firstRun = false;
                     string sourceDir = Path.Combine(assemblyFolder, @"test");
@@ -156,7 +157,6 @@ namespace Netcad.NDU.GUA.Settings
                 }
                 this._config.Hostname = "http://80.253.246.57:8083/";
                 this._config.Token = "28rCtj9NOH94vxyan5MX";
-                
 
                 // this._config.IntervalInMinutes = Math.Min(this._config.IntervalInMinutes, 0.5);
 #endif

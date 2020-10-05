@@ -183,8 +183,9 @@ namespace Netcad.NDU.GUA.Elements.Items
                 string fn = getConfFileName(stt);
                 File.Copy(configFn, fn);
 
-                this.YamlConnectorItems = new Dictionary<string, object>();
-                this.YamlConnectorItems.Add("configuration", name);
+                if (this.YamlConnectorItems == null)
+                    this.YamlConnectorItems = new Dictionary<string, object>();
+                this.YamlConnectorItems["configuration"] = name;
             }
         }
         private void deactivate(ISettings stt)
