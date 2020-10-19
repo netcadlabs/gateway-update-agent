@@ -43,6 +43,20 @@ namespace Netcad.NDU.GUA.Updater
             using(var wcDownload = new WebClient())
             {
                 string bundlesArrayJson = wcDownload.DownloadString(url);
+                
+                // //**test
+                // string bundlesArrayJson = @"
+                //             [
+                //                 {
+                //                     'type': 'sigara',
+                //                     'uuid': 'uuid-5',
+                //                     'url': 'https://github.com/netcadlabs/gateway-update-agent/archive/master.zip',
+                //                     'category': 'PACKAGE',
+                //                     'version': 1,
+                //                     'status': 2
+                //                 }
+                //             ]
+                //             ";
 
                 UpdateInfo[] updates = null;
                 try

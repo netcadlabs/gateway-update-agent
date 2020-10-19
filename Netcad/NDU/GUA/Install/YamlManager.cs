@@ -17,6 +17,7 @@ namespace Netcad.NDU.GUA.Install
         private const string Key_Type = "type";
         private const string Key_GUAVersion = "guaVersion";
         private const string Key_Name = "name";
+        private const string Key_Status = "status";
         private readonly ILogger logger;
         private readonly ISettings settings;
 
@@ -147,6 +148,7 @@ namespace Netcad.NDU.GUA.Install
             Dictionary<object, object> dic = new Dictionary<object, object>();
             dic.Add(Key_Name, $"{b.Type} Connector");
             dic.Add(Key_Type, $"{b.Type}");
+            dic.Add(Key_Status, b.Status); //**NDU-340
 
             foreach (var kv in b.GetYamlCustomProperties())
                 dic.Add(kv.Key, kv.Value);

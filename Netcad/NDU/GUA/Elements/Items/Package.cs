@@ -305,7 +305,7 @@ namespace Netcad.NDU.GUA.Elements.Items
                 string infoJsonFn = getInfoJsonFn(extractDir);
                 if (!File.Exists(infoJsonFn))
                     throw new Exception($"Cannot find info.json file. {extractDir}");
-
+                    
                 return Helper.DeserializeFromJsonFile<PackInfoJson>(infoJsonFn);
             }
         }

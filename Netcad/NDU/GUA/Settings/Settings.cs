@@ -136,7 +136,7 @@ namespace Netcad.NDU.GUA.Settings
                 string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 string testDir = @"/tmp/Netcad/NDU/GUA_test";
 
-                bool initialize = true;
+                bool initialize = false;
                 if (_firstRun && initialize)
                 {
                     _firstRun = false;

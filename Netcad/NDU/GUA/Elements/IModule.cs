@@ -24,6 +24,9 @@ namespace Netcad.NDU.GUA.Elements
         string ConfigType { get; set; }
         CustomConfigType CustomConfigType { get; set; }
 
+        //**NDU-340
+        int Status { get; set; }
+
         string GetYamlFileName(ISettings stt);
         string GetYamlCollectionName(ISettings stt);
     }

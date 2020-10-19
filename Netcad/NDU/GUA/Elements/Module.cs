@@ -21,6 +21,7 @@ namespace Netcad.NDU.GUA.Elements
 
         public string ConfigType { get => this.lite.ConfigType; set => this.lite.ConfigType = value; }
         public CustomConfigType CustomConfigType { get => this.lite.CustomConfigType; set => this.lite.CustomConfigType = value; }
+        public int Status { get => this.lite.Status; set => this.lite.Status = value; }
         public string GetYamlFileName(ISettings settings)
         {
             if (this.CustomConfigType != null)
@@ -329,6 +330,8 @@ namespace Netcad.NDU.GUA.Elements
 
             public string ConfigType { get; set; }
             public CustomConfigType CustomConfigType { get; internal set; }
+            
+            public int Status { get; set; }
         }
     }
 }

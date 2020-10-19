@@ -15,18 +15,21 @@ namespace Netcad.NDU.GUA.Elements
         public string config_type { get; set; }
         public CustomConfigType custom_config_type { get; set; }
 
+        //**NDU-340
+        public int status { get; set; }
+
         internal UpdateInfo Clone()
         {
             return new UpdateInfo()
             {
                 Type = this.Type,
-                UUID = this.UUID,
-                Url = this.Url,
-                Category = this.Category,
-                Version = this.Version,
-                config_type = this.config_type,
-                custom_config_type = this.custom_config_type
+                    UUID = this.UUID,
+                    Url = this.Url,
+                    Category = this.Category,
+                    Version = this.Version,
+                    config_type = this.config_type,
+                    custom_config_type = this.custom_config_type
             };
         }
-    }    
+    }
 }
