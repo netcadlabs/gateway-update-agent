@@ -176,6 +176,7 @@ namespace Netcad.NDU.GUA.Elements
                         {
                             case Category.Package:
                             case Category.Config:
+                            case Category.CustomConfig:
                                 item.State = States.DeactivateRequired;
                                 break;
                             default:
@@ -252,6 +253,8 @@ namespace Netcad.NDU.GUA.Elements
                     return new Package(ct, cct);
                 case Category.Command:
                     return new Command(ct, cct);
+                case Category.CustomConfig:
+                    return new CustomConfig(this.Type, ct, cct);
                 default:
                     throw new NotImplementedException();
             }
@@ -330,7 +333,7 @@ namespace Netcad.NDU.GUA.Elements
 
             public string App { get; set; }
             public CustomApp CustomApp { get; internal set; }
-            
+
             public int Status { get; set; }
         }
     }

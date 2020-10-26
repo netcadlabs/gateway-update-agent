@@ -70,7 +70,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
     {
         "type": "sigara",
         "uuid": "uuid-1",
-        "url": "https://.../config.json",
+        "url": "https://.../config.json.zip",
         "category": "CONFIG",
         "version": 23,
         
@@ -124,7 +124,7 @@ Custum config response örneği:
         "version": 1,
         
         "app" : "ndu_gate"
-    }
+    },
     {
         "type": "sosyal mesafe",
         "url": "https://.../custom_config.json",
@@ -152,7 +152,7 @@ Custum config response örneği:
     * *uuid-3* model dosyaları içeriyor. "sigara" modülü için bir model değişikliği yaptığımız zaman, sadece *uuid-3* için bir yeni versiyon çıkarmak yeterli olacak, gateway'in modül için kullanılan framework paketini tekrar indirmesine gerek olmayacak.
 * ***url:*** İndirilecek olan veri.
 * ***category:*** *Url* içeriğinin ne olacağı ifade eder.
-  * **CONFIG:** Url içeriği json'dır. *ayarlar:ConfigFolder/**\<type>.json*** dosyası olarak kaydedilir.
+  * **CONFIG:** Url içeriği bir zip dostasıdır. Zip dosyası içerisinde tek json dosyası vardır. Bu dosya *ayarlar:ConfigFolder/**\<type>.json*** dosyası olarak kaydedilir.
   * **PACKAGE:** Url içeriği bir zip dosyasıdır. Zip dosyası içerisinde:
     * *Root* dizinde bir **info.json** dosyası olabilir. Örnek:
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -37,10 +38,28 @@ namespace Netcad.NDU.GUA.Updater
         }
 
         private const string suffix = "/api/gus/v1/gateway/";
-        private const string suffix_customConfig = "/api/gus/v1/gateway/custom_config/";//******koray
+        private const string suffix_customConfig = "/api/gus/v1/gateway/custom_config/"; //******koray
         private void checkUpdates()
         {
-            string url = Helper.CombineUrl(settings.Hostname, suffix, settings.Token);
+            List<UpdateInfo> updates = new List<UpdateInfo>();
+            updates.AddRange(getUpdates(Helper.CombineUrl(settings.Hostname, suffix, settings.Token)));
+            updates.AddRange(getUpdates(Helper.CombineUrl(settings.Hostname, suffix_customConfig, settings.Token)));
+
+            UpdateResult[] arr = this.installManager.CheckUpdates(updates).ToArray();
+            if (arr.Length > 0)
+            {
+                string json = JsonConvert.SerializeObject(arr);
+
+                using(var wcPost = new WebClient())
+                {
+                    wcPost.Headers[HttpRequestHeader.ContentType] = "application/json";
+                    string urlPost = Helper.CombineUrl(settings.Hostname, suffix, settings.Token, "result");
+                    string res = wcPost.UploadString(urlPost, json);
+                }
+            }
+        }
+        private IEnumerable<UpdateInfo> getUpdates(string url)
+        {
             using(var wcDownload = new WebClient())
             {
                 string bundlesArrayJson = wcDownload.DownloadString(url);
@@ -58,36 +77,24 @@ namespace Netcad.NDU.GUA.Updater
                 //                 }
                 //             ]
                 //             ";
-
+                
                 UpdateInfo[] updates = null;
                 try
                 {
                     updates = Helper.DeserializeFromJsonText<UpdateInfo[]>(bundlesArrayJson);
-
-                    // //**test
-                    // var lst = updates.ToList();
-                    // lst.Add(updates[0].Clone());
-                    // var u = lst.Last();
-                    // u.UUID = "aaa";
-                    // updates = lst.ToArray();
                 }
                 catch (Exception ex)
                 {
                     throw new Exception($"Error while parsing bundles! API response:{bundlesArrayJson}", ex);
                 }
 
-                UpdateResult[] arr = this.installManager.CheckUpdates(updates).ToArray();
-                if (arr.Length > 0)
-                {
-                    string json = JsonConvert.SerializeObject(arr);
-
-                    using(var wcPost = new WebClient())
+                if (updates != null)
+                    foreach (UpdateInfo ui in updates)
                     {
-                        wcPost.Headers[HttpRequestHeader.ContentType] = "application/json";
-                        string urlPost = Helper.CombineUrl(settings.Hostname, suffix, settings.Token, "result");
-                        string res = wcPost.UploadString(urlPost, json);
+                        if (string.IsNullOrWhiteSpace(ui.UUID))
+                            ui.UUID = ui.Type;
+                        yield return ui;
                     }
-                }
             }
         }
 
