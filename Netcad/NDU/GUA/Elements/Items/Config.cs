@@ -20,14 +20,14 @@ namespace Netcad.NDU.GUA.Elements.Items
         public Dictionary<string, object> YamlConnectorItems { get; set; }
 
         //**NDU-310
-        public string config_type { get; set; }
-        public CustomConfigType custom_config_type { get; set; }
+        public string app { get; set; }
+        public CustomApp custom_app { get; set; }
 
         public string Type { get; private set; }
-        public Config(string type, string ct, CustomConfigType cct)
+        public Config(string type, string ct, CustomApp cct)
         {
-            this.config_type = ct;
-            this.custom_config_type = cct;
+            this.app = ct;
+            this.custom_app = cct;
             this.Type = type;
         }
 
@@ -45,7 +45,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         }
         private string getConfFileName(ISettings stt)
         {
-            string configFolder = stt.GetConfigFolder(this.config_type, this.custom_config_type);
+            string configFolder = stt.GetConfigFolder(this.app, this.custom_app);
             if (!Directory.Exists(configFolder))
                 Directory.CreateDirectory(configFolder);
             return Path.Combine(configFolder, _getNameForConfigFile());

@@ -19,22 +19,22 @@ namespace Netcad.NDU.GUA.Elements
         public string Type { get => this.lite.Type; set => this.lite.Type = value; }
         public string GUAVersion { get => this.lite.GUAVersion; set => this.lite.GUAVersion = value; }
 
-        public string ConfigType { get => this.lite.ConfigType; set => this.lite.ConfigType = value; }
-        public CustomConfigType CustomConfigType { get => this.lite.CustomConfigType; set => this.lite.CustomConfigType = value; }
+        public string App { get => this.lite.App; set => this.lite.App = value; }
+        public CustomApp CustomApp { get => this.lite.CustomApp; set => this.lite.CustomApp = value; }
         public int Status { get => this.lite.Status; set => this.lite.Status = value; }
         public string GetYamlFileName(ISettings settings)
         {
-            if (this.CustomConfigType != null)
-                return this.CustomConfigType.YamlFileName;
+            if (this.CustomApp != null)
+                return this.CustomApp.YamlFileName;
             else
-                return settings.GetYamlFileName(this.ConfigType, this.CustomConfigType);
+                return settings.GetYamlFileName(this.App, this.CustomApp);
         }
         public string GetYamlCollectionName(ISettings settings)
         {
-            if (this.CustomConfigType != null)
-                return this.CustomConfigType.YamlCollectionName;
+            if (this.CustomApp != null)
+                return this.CustomApp.YamlCollectionName;
             else
-                return settings.GetYamlCollectionName(this.ConfigType, this.CustomConfigType);
+                return settings.GetYamlCollectionName(this.App, this.CustomApp);
         }
 
         public Dictionary<string, object> GetYamlCustomProperties()
@@ -129,7 +129,7 @@ namespace Netcad.NDU.GUA.Elements
         {
             if (!this.items.ContainsKey(u.UUID))
             {
-                IItem item = createItem(u.Category, u.config_type, u.custom_config_type);
+                IItem item = createItem(u.Category, u.app, u.custom_app);
                 item.UUID = u.UUID;
                 item.Version = u.Version;
                 item.URL = u.Url;
@@ -242,7 +242,7 @@ namespace Netcad.NDU.GUA.Elements
             return lst;
         }
 
-        private IItem createItem(Category c, string ct, CustomConfigType cct)
+        private IItem createItem(Category c, string ct, CustomApp cct)
         {
             switch (c)
             {
@@ -328,8 +328,8 @@ namespace Netcad.NDU.GUA.Elements
             public string Type { get; set; }
             public string GUAVersion { get; set; }
 
-            public string ConfigType { get; set; }
-            public CustomConfigType CustomConfigType { get; internal set; }
+            public string App { get; set; }
+            public CustomApp CustomApp { get; internal set; }
             
             public int Status { get; set; }
         }

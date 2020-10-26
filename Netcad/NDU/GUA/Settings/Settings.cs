@@ -13,11 +13,11 @@ namespace Netcad.NDU.GUA.Settings
             public string Hostname { get; set; }
             public string Token { get; set; }
             public double IntervalInMinutes { get; set; }
-            public configType[] ConfigTypes { get; set; }
+            public app[] Apps { get; set; }
         }
-        private class configType
+        private class app
         {
-            public string ConfigType { get; set; }
+            public string App { get; set; }
             public string ExtensionFolder { get; set; }
             public string ConfigFolder { get; set; }
             public string YamlCollectionName { get; set; }
@@ -30,52 +30,52 @@ namespace Netcad.NDU.GUA.Settings
         public string Token { get { return _config.Token; } }
         public double IntervalInMinutes { get { return _config.IntervalInMinutes; } }
 
-        private Dictionary<string, configType> _confTypes;
-        private configType _getConfType(string confType)
+        private Dictionary<string, app> _confTypes;
+        private app _getConfType(string confType)
         {
             if (string.IsNullOrWhiteSpace(confType))
-                confType = ISettings.DEFAULT_CONFIG_TYPE;
+                confType = ISettings.DEFAULT_APP;
             else if (!this._confTypes.ContainsKey(confType))
             {
-                _logger.LogError($"Bad ConfigType:{confType}");
-                confType = ISettings.DEFAULT_CONFIG_TYPE;
+                _logger.LogError($"Bad app:{confType}");
+                confType = ISettings.DEFAULT_APP;
             }
             return _confTypes[confType];
         }
-        public string GetExtensionFolder(string configType, CustomConfigType custom_config_type)
+        public string GetExtensionFolder(string app, CustomApp custom_app)
         {
-            if (custom_config_type != null)
-                return custom_config_type.ExtensionFolder;
+            if (custom_app != null)
+                return custom_app.ExtensionFolder;
             else
-                return _getConfType(configType).ExtensionFolder;
+                return _getConfType(app).ExtensionFolder;
         }
-        public string GetConfigFolder(string configType, CustomConfigType custom_config_type)
+        public string GetConfigFolder(string app, CustomApp custom_app)
         {
-            if (custom_config_type != null)
-                return custom_config_type.ConfigFolder;
+            if (custom_app != null)
+                return custom_app.ConfigFolder;
             else
-                return _getConfType(configType).ConfigFolder;
+                return _getConfType(app).ConfigFolder;
         }
-        public string GetYamlCollectionName(string configType, CustomConfigType custom_config_type)
+        public string GetYamlCollectionName(string app, CustomApp custom_app)
         {
-            if (custom_config_type != null)
-                return custom_config_type.YamlCollectionName;
+            if (custom_app != null)
+                return custom_app.YamlCollectionName;
             else
-                return _getConfType(configType).YamlCollectionName;
+                return _getConfType(app).YamlCollectionName;
         }
-        public string GetYamlFileName(string configType, CustomConfigType custom_config_type)
+        public string GetYamlFileName(string app, CustomApp custom_app)
         {
-            if (custom_config_type != null)
-                return custom_config_type.YamlFileName;
+            if (custom_app != null)
+                return custom_app.YamlFileName;
             else
-                return _getConfType(configType).YamlFileName;
+                return _getConfType(app).YamlFileName;
         }
-        public string[] GetRestartServices(string configType, CustomConfigType custom_config_type)
+        public string[] GetRestartServices(string app, CustomApp custom_app)
         {
-            if (custom_config_type != null)
-                return custom_config_type.RestartServices;
+            if (custom_app != null)
+                return custom_app.RestartServices;
             else
-                return _getConfType(configType).RestartServices;
+                return _getConfType(app).RestartServices;
         }
 
         public string HistoryFolder { get; private set; }
@@ -123,14 +123,14 @@ namespace Netcad.NDU.GUA.Settings
                 if (!string.IsNullOrWhiteSpace(this._config.Token) && !this._config.Hostname.EndsWith("/"))
                     this._config.Hostname += "/";
 
-                this._confTypes = new Dictionary<string, configType>();
-                foreach (var ty in this._config.ConfigTypes)
-                    if (!this._confTypes.ContainsKey(ty.ConfigType))
-                        this._confTypes.Add(ty.ConfigType, ty);
+                this._confTypes = new Dictionary<string, app>();
+                foreach (var ty in this._config.Apps)
+                    if (!this._confTypes.ContainsKey(ty.App))
+                        this._confTypes.Add(ty.App, ty);
                     else
-                        throw new Exception($"Duplicated ConfigType definden in {fileName}");
-                if (!this._confTypes.ContainsKey(ISettings.DEFAULT_CONFIG_TYPE))
-                    throw new Exception($"'{ISettings.DEFAULT_CONFIG_TYPE}' ConfigType not defined in {fileName}");
+                        throw new Exception($"Duplicated App definden in {fileName}");
+                if (!this._confTypes.ContainsKey(ISettings.DEFAULT_APP))
+                    throw new Exception($"'{ISettings.DEFAULT_APP}' App not defined in {fileName}");
 
 #if DEBUG
                 string assemblyFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -144,12 +144,12 @@ namespace Netcad.NDU.GUA.Settings
                     Helper.CopyDir(sourceDir, testDir, true);
                 }
 
-                // this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].YamlFileName = Path.Combine(testDir, @"tb_gateway.yaml");
-                // this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].ConfigFolder = Path.Combine(testDir, @"configs");
-                // this._confTypes[ISettings.DEFAULT_CONFIG_TYPE].ExtensionFolder = Path.Combine(testDir, @"extensions");
+                // this._confTypes[ISettings.DEFAULT_APP].YamlFileName = Path.Combine(testDir, @"tb_gateway.yaml");
+                // this._confTypes[ISettings.DEFAULT_APP].ConfigFolder = Path.Combine(testDir, @"configs");
+                // this._confTypes[ISettings.DEFAULT_APP].ExtensionFolder = Path.Combine(testDir, @"extensions");
 
                 //**NDU-317
-                foreach (configType cf in this._confTypes.Values)
+                foreach (app cf in this._confTypes.Values)
                 {
                     cf.YamlFileName = testDir + cf.YamlFileName;
                     cf.ConfigFolder = testDir + cf.ConfigFolder;
@@ -160,7 +160,7 @@ namespace Netcad.NDU.GUA.Settings
 
                 // this._config.IntervalInMinutes = Math.Min(this._config.IntervalInMinutes, 0.5);
 #endif
-                string extDir = this.GetExtensionFolder(ISettings.DEFAULT_CONFIG_TYPE, null);
+                string extDir = this.GetExtensionFolder(ISettings.DEFAULT_APP, null);
                 if (!Directory.Exists(extDir))
                     Directory.CreateDirectory(extDir);
                 this.HistoryFolder = Path.Combine(extDir, "_GUA_History");

@@ -12,8 +12,8 @@ namespace Netcad.NDU.GUA.Elements
         public int Version { get; set; }
 
         //**NDU-310
-        public string config_type { get; set; }
-        public CustomConfigType custom_config_type { get; set; }
+        public string app { get; set; }
+        public CustomApp custom_app { get; set; }
 
         //**NDU-340
         public int status { get; set; }
@@ -27,8 +27,8 @@ namespace Netcad.NDU.GUA.Elements
                     Url = this.Url,
                     Category = this.Category,
                     Version = this.Version,
-                    config_type = this.config_type,
-                    custom_config_type = this.custom_config_type
+                    app = this.app,
+                    custom_app = this.custom_app
             };
         }
     }

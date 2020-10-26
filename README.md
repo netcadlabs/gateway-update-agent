@@ -34,9 +34,9 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
   "Token": "bG4IO6ICHIOl1obCB2Mu",
   "IntervalInMinutes": 30,
       
-  "ConfigTypes": [
+  "Apps": [
       {
-          "ConfigType" :"default",
+          "App" :"default",
           "ExtensionFolder" : "/var/lib/thingsboard_gateway/extensions/",
           "ConfigFolder" : "/etc/thingsboard-gateway/config" ,
           "YamlCollectionName" : "connectors",
@@ -44,7 +44,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
           "RestartServices" : [ "thingsboard-gateway.service"]          
       },    
       {
-          "ConfigType" :"ndu_gate",
+          "App" :"ndu_gate",
           "ExtensionFolder" : "/var/lib/ndu_gate/runners/",
           "ConfigFolder" : "/etc/ndu-gate/config" ,
           "YamlCollectionName" : "runners",
@@ -74,7 +74,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
         "category": "CONFIG",
         "version": 23,
         
-        "custom_config_type":
+        "custom_app":
         {
           "ExtensionFolder" : "/<custom>/",
           "ConfigFolder" : "/<custom>/config" ,
@@ -90,7 +90,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
         "category": "PACKAGE",
         "version": 5,
         
-        "config_type" : "ndu_gate"
+        "app" : "ndu_gate"
     },
     {
         "type": "sigara",
@@ -123,7 +123,7 @@ Custum config response örneği:
         "category": "CUSTOM_CONFIG",
         "version": 1,
         
-        "config_type" : "ndu_gate"
+        "app" : "ndu_gate"
     }
     {
         "type": "sosyal mesafe",
@@ -131,7 +131,7 @@ Custum config response örneği:
         "category": "CUSTOM_CONFIG",
         "version": 1,
         
-        "custom_config_type":
+        "custom_app":
         {
           "ExtensionFolder" : "/<custom>/",
           "ConfigFolder" : "/<custom>/config" ,

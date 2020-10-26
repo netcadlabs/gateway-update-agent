@@ -21,8 +21,8 @@ namespace Netcad.NDU.GUA.Elements
         bool IsUpdateRequired(UpdateInfo u);
 
         //**NDU-310
-        string ConfigType { get; set; }
-        CustomConfigType CustomConfigType { get; set; }
+        string App { get; set; }
+        CustomApp CustomApp { get; set; }
 
         //**NDU-340
         int Status { get; set; }

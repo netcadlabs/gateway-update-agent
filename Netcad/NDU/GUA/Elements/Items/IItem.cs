@@ -18,7 +18,7 @@ namespace Netcad.NDU.GUA.Elements.Items
         IEnumerable<UpdateResult> UpdateIfRequired(IModule parent, ServiceState ss, ISettings stt, ILogger logger);
 
         //**NDU-310
-        string config_type { get; set; }
-        CustomConfigType custom_config_type { get; set; }
+        string app { get; set; }
+        CustomApp custom_app { get; set; }
     }
 }

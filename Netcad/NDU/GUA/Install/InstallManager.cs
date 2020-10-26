@@ -77,8 +77,8 @@ namespace Netcad.NDU.GUA.Install
                         b = ModuleFactory.CreateModule();
                         b.Type = u.Type;
                         b.GUAVersion = this.guaVersion;
-                        b.ConfigType = u.config_type;
-                        b.CustomConfigType = u.custom_config_type;
+                        b.App = u.app;
+                        b.CustomApp = u.custom_app;
                         b.Status = u.status;
                         modules.Add(u.Type, b);
                     }
@@ -108,7 +108,7 @@ namespace Netcad.NDU.GUA.Install
                     try
                     {
                         foreach (IModule b in dirty)
-                            foreach (string serviceName in settings.GetRestartServices(b.ConfigType, b.CustomConfigType))
+                            foreach (string serviceName in settings.GetRestartServices(b.App, b.CustomApp))
                                 if (services.Add(serviceName))
                                 {
                                     logger.LogInformation($"Stopping {serviceName}!");
@@ -149,7 +149,7 @@ namespace Netcad.NDU.GUA.Install
                     try
                     {
                         foreach (IModule b in statusChanged)
-                            foreach (string serviceName in settings.GetRestartServices(b.ConfigType, b.CustomConfigType))
+                            foreach (string serviceName in settings.GetRestartServices(b.App, b.CustomApp))
                                 if (services.Add(serviceName))
                                 {
                                     logger.LogInformation($"Stopping {serviceName}!");

@@ -1,6 +1,6 @@
 namespace Netcad.NDU.GUA.Settings
 {
-    public class CustomConfigType
+    public class CustomApp
     {
         public string ExtensionFolder { get; set; }
         public string ConfigFolder { get; set; }
