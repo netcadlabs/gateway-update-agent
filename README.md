@@ -112,13 +112,33 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
         "url": "https://.../sigara-model-komutları.zip",
         "category": "COMMAND",
         "version": 1,
-    },
+    }
+```
+Custum config response örneği:
+```json
+[
     {
         "type": "sigara",
-        "uuid": "uuid-6",
-        "url": "https://.../custom_config.json.",
+        "url": "https://.../custom_config.json",
         "category": "CUSTOM_CONFIG",
         "version": 1,
+        
+        "config_type" : "ndu_gate"
+    }
+    {
+        "type": "sosyal mesafe",
+        "url": "https://.../custom_config.json",
+        "category": "CUSTOM_CONFIG",
+        "version": 1,
+        
+        "custom_config_type":
+        {
+          "ExtensionFolder" : "/<custom>/",
+          "ConfigFolder" : "/<custom>/config" ,
+          "YamlCollectionName" : "<custom>",
+          "YamlFileName" : "/<custom>/<custom>.yaml",          
+          "RestartServices" : [ "<custom service 1>", "<custom service 2>"]
+        }
     }
 ]
 ```
@@ -162,7 +182,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
     * **install.sh** isimli bir dosya varsa, Thingsboard servisi **durdurulduktan sonra** çalıştırılır.
     * **post_install.sh** isimli bir dosya varsa, Thingsboard servisi **çalıştırıldıktan sonra** çalıştırılır.
     * **uninstall.sh** isimli bir dosya varsa, bu elemanın uninstall işlemi için çalıştırılır.
-  * **CUSTOM_CONFIG:** Url içeriği json'dır. **ayarlar:CustomConfigFolder/**\<type>.json*** dosyası olarak kaydedilir
+  * **CUSTOM_CONFIG:** Url içeriği json'dır. *ayarlar:ConfigFolder/**\<type>_custom.json*** dosyası olarak kaydedilir
 
 
 ## Çalışma Detayları

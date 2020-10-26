@@ -37,13 +37,14 @@ namespace Netcad.NDU.GUA.Updater
         }
 
         private const string suffix = "/api/gus/v1/gateway/";
+        private const string suffix_customConfig = "/api/gus/v1/gateway/custom_config/";//******koray
         private void checkUpdates()
         {
             string url = Helper.CombineUrl(settings.Hostname, suffix, settings.Token);
             using(var wcDownload = new WebClient())
             {
                 string bundlesArrayJson = wcDownload.DownloadString(url);
-                
+
                 // //**test
                 // string bundlesArrayJson = @"
                 //             [
