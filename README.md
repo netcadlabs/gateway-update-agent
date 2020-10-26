@@ -112,6 +112,13 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
         "url": "https://.../sigara-model-komutları.zip",
         "category": "COMMAND",
         "version": 1,
+    },
+    {
+        "type": "sigara",
+        "uuid": "uuid-6",
+        "url": "https://.../custom_config.json.",
+        "category": "CUSTOM_CONFIG",
+        "version": 1,
     }
 ]
 ```
@@ -155,6 +162,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
     * **install.sh** isimli bir dosya varsa, Thingsboard servisi **durdurulduktan sonra** çalıştırılır.
     * **post_install.sh** isimli bir dosya varsa, Thingsboard servisi **çalıştırıldıktan sonra** çalıştırılır.
     * **uninstall.sh** isimli bir dosya varsa, bu elemanın uninstall işlemi için çalıştırılır.
+  * **CUSTOM_CONFIG:** Url içeriği json'dır. **ayarlar:CustomConfigFolder/**\<type>.json*** dosyası olarak kaydedilir
 
 
 ## Çalışma Detayları
@@ -166,6 +174,7 @@ sudo systemctl restart GatewayUpdateAgent.  # yeniden başlatır
     * **CONFIG** elemanlar için oluşturulan json dosyalarını aktif olmayan elemanlar için kullanılan bir dizine taşır. Yani config deaktive edilir.
     * **PACKAGE** içeriği ile gelen tim dosyalar aktif olmayan elemanlar için kullanılan bir dizine taşınır. Yani package deaktive edilir.
     * **COMMAND** içeriğinde **uninstall.sh** dosyası varsa çalıştırılır. Command'e ait tutulan birşey varsa silinir. Yani command elemanları deaktive edilmez, kaldırılır.
+    * **CUSTOM_CONFIG** elemanlar için oluşturulan json dosyalarını aktif olmayan elemanlar için kullanılan bir dizine taşır. Yani custom_config deaktive edilir.
   * İnaktif hale gelmiş bir eleman API'nin döndüğü listede yeniden kurulmak istenirse.
     * Versiyon aynı değilse inaktif olarak tutulan dosyalar silinir, eleman yeniden indirilir.
     * Versiyon aynıysa, eleman indirilmez, inaktif olarak tutulan dosyalar kullanılarak yeniden kurulum yapılır.

@@ -4,6 +4,7 @@ namespace Netcad.NDU.GUA.Elements
     {
         Config = 0,
         Package = 1,
-        Command = 2
+        Command = 2,
+        
     }
 }
