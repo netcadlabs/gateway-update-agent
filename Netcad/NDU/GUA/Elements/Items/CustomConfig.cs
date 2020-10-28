@@ -197,7 +197,7 @@ namespace Netcad.NDU.GUA.Elements.Items
 
                 if (this.YamlConnectorItems == null)
                     this.YamlConnectorItems = new Dictionary<string, object>();
-                this.YamlConnectorItems["configuration"] = name;
+                this.YamlConnectorItems["custom_configuration"] = name;
             }
         }
         private void deactivate(ISettings stt)
