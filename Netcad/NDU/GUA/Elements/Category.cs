@@ -5,6 +5,6 @@ namespace Netcad.NDU.GUA.Elements
         Config = 0,
         Package = 1,
         Command = 2,
-        CustomConfig=3//*****koray
+        CustomConfig = 3 //**NDU-310
     }
 }

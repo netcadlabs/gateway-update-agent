@@ -38,7 +38,7 @@ namespace Netcad.NDU.GUA.Updater
         }
 
         private const string suffix = "/api/gus/v1/gateway/";
-        private const string suffix_customConfig = "/api/gus/v1/gateway/custom_config/"; //******koray
+        private const string suffix_customConfig = "/api/gus/v1/gateway/custom_config/"; //**NDU-310
         private void checkUpdates()
         {
             List<UpdateInfo> updates = new List<UpdateInfo>();
@@ -77,7 +77,7 @@ namespace Netcad.NDU.GUA.Updater
                 //                 }
                 //             ]
                 //             ";
-                
+
                 UpdateInfo[] updates = null;
                 try
                 {
